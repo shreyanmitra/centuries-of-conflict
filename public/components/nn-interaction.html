@@ -1,0 +1,40 @@
+<div class="nn-plot-wrap mb-2">
+  <svg id="nn-main-chart" viewBox="0 0 760 200"></svg>
+</div>
+
+<div class="control-panel p-3 mb-3">
+  <div class="mb-2">
+    <label for="nn-target-select" class="form-label fw-semibold"
+      >Target function</label
+    >
+    <select id="nn-target-select" class="form-select">
+      <option value="wiggle">Wiggly periodic</option>
+      <option value="step">Smooth step-like</option>
+      <option value="sharp">Sharp corner</option>
+    </select>
+  </div>
+
+  <label for="nn-unit-slider" class="form-label fw-semibold"
+    >Hidden units: <span id="nn-unit-value">6</span></label
+  >
+  <input
+    id="nn-unit-slider"
+    class="form-range"
+    type="range"
+    min="1"
+    max="24"
+    step="1"
+    value="6"
+  />
+
+  <div class="form-check mb-2">
+    <input class="form-check-input" type="checkbox" id="nn-show-basis" />
+    <label class="form-check-label" for="nn-show-basis">
+      Show hidden-unit basis functions
+    </label>
+  </div>
+
+  <div class="small text-muted" id="nn-metrics">
+    RMS error: 0.0000 | max error: 0.0000
+  </div>
+</div>

@@ -1,0 +1,36 @@
+<div class="cad-canvas-wrap mb-2" id="cad-view"></div>
+
+<div class="control-panel p-3 mb-3">
+  <div class="form-check form-switch mb-2">
+    <input
+      class="form-check-input"
+      type="checkbox"
+      role="switch"
+      id="cad-mesh-toggle"
+      checked
+    />
+    <label class="form-check-label" for="cad-mesh-toggle">
+      Show exported 3MF tessellation
+    </label>
+  </div>
+
+  <label for="cad-tess-slider" class="form-label fw-semibold"
+    >Mesh density: <span id="cad-tess-value">6</span></label
+  >
+  <input
+    id="cad-tess-slider"
+    class="form-range"
+    type="range"
+    min="6"
+    max="36"
+    step="1"
+    value="6"
+  />
+
+  <div class="d-flex align-items-center justify-content-between">
+    <div class="small text-muted" id="cad-mesh-stats">
+      Smooth preview: analytical surface
+    </div>
+    <span class="badge cad-badge">NURBS → triangles</span>
+  </div>
+</div>

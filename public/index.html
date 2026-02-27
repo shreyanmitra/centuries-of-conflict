@@ -1,0 +1,468 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>CSE 442: Data Visualization</title>
+    <link
+      href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css"
+      rel="stylesheet"
+      crossorigin="anonymous"
+    />
+    <link
+      rel="stylesheet"
+      href="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.css"
+    />
+    <link rel="stylesheet" href="style.css" />
+  </head>
+  <body>
+    <main class="container py-5">
+      <article class="mx-auto content-wrap">
+        <h1 class="text-center mb-4 fw-semibold">
+          Models and Generations
+        </h1>
+        <p class="lead text-center mb-4">538astin Santy and Json Kim</p>
+
+        <p class="lead">
+          The theme of this year's final project is "Explorable Explanation" and
+          as I was preparing the template, I decided to build an explorable
+          explanation myself. I've been wanting to explore approximation theory
+          -- the math of representing complex objects with simpler, finite ones
+          -- and this seemed like the right opportunity.
+        </p>
+        <p class="lead">
+          We encounter curves everywhere: from the outline of a leaf, to the arc
+          of a bridge, the spiral of a shell, or the path of a satellite.
+        </p>
+        <p class="lead">
+          But computers do not store smooth, continuous curves. They store
+          discrete numbers.
+        </p>
+        <p class="lead">And so the question becomes:</p>
+        <ul class="lead">
+          <li>
+            How can a finite collection of numbers represent a smooth curve?
+          </li>
+          <li>How close can we get?</li>
+          <li>What are the limits of that representation?</li>
+        </ul>
+
+        <p class="lead">
+          What does it mean to draw something smooth using only finitely many
+          numbers?
+        </p>
+
+        <!-- Act I — Power -->
+        <h2 class="text-center my-4">Starting Simple</h2>
+
+        <p class="lead">
+          If a curve must be described using finitely many numbers, we need a
+          family of functions controlled by finitely many parameters.
+        </p>
+
+        <p class="lead">
+          Polynomials are the simplest such family. We can fix a degree
+          <em>n</em>, and the shape of the curve is completely determined by
+          <em>n + 1</em> coefficients.
+        </p>
+
+        <p class="lead">
+          Beyond their simplicity for computation, polynomials are smooth and
+          easy to differentiate. More importantly, any sufficiently smooth
+          function admits a Taylor polynomial expansion.
+        </p>
+
+        <div class="interactive-wide">
+          <section data-component="components/finite-spaces.html"></section>
+        </div>
+
+        <p class="small text-muted mb-4 text-center">
+          The gray curve is a target function (e<sup>x</sup>). The blue curve is
+          a polynomial of the chosen degree. Increasing the degree enlarges the
+          space of possibilities.
+        </p>
+
+        <p class="lead">
+          At first, this feels like freedom. The curve can bend, twist, flatten,
+          or grow rapidly depending on those coefficients.
+        </p>
+
+        <p class="lead">But the goal is not to create arbitrary polynomials.</p>
+
+        <p class="lead">
+          It is to approximate curves that exist in the real-world.
+        </p>
+
+        <!-- Act II — Purpose -->
+        <h2 class="text-center my-4">Approximation</h2>
+
+        <p class="lead">
+          If the curve is already given, then choosing coefficients becomes a
+          different kind of problem.
+        </p>
+
+        <p class="lead">
+          Among all polynomials of a fixed degree, which one comes closest?
+        </p>
+
+        <p class="lead">That requires deciding what “close” even means.</p>
+
+        <div class="interactive-wide">
+          <section data-component="components/approximation.html"></section>
+        </div>
+
+        <p class="small mb-4">
+          As the degree increases, the error typically decreases. But unless the
+          target is itself a polynomial, the error does not disappear entirely.
+        </p>
+
+        <p class="lead">
+          Increasing the degree enlarges the space of available curves.
+        </p>
+
+        <p class="lead">
+          One might expect the approximation to simply improve.
+        </p>
+
+        <p class="lead">
+          But something else begins to happen near the boundaries.
+        </p>
+
+        <p class="lead">
+          For certain functions, higher-degree polynomials start to oscillate.
+          The fit improves in some regions and deteriorates in others.
+        </p>
+
+        <p class="lead">
+          More flexibility does not always mean more stability.
+        </p>
+
+        <!-- Act III — Fragility -->
+        <h2 class="text-center my-4">When High Degree Isn’t Enough</h2>
+
+        <p class="lead">
+          Increasing the degree enlarges the family of polynomials available to
+          us.
+        </p>
+
+        <p class="lead">
+          It is tempting to think that more flexibility simply means better
+          approximation.
+        </p>
+
+        <p class="lead">But that intuition turns out to be incomplete.</p>
+
+        <div class="interactive-wide">
+          <section data-component="components/runge.html"></section>
+        </div>
+
+        <p class="small text-muted mb-4 text-center">
+          Try interpolating the function 1 / (1 + 25x²) at equally spaced
+          points.
+        </p>
+
+        <p class="lead">
+          For certain functions, as the degree increases, the approximation
+          improves near the center, but begins to oscillate dramatically near
+          the boundaries.
+        </p>
+
+        <p class="lead">
+          This behavior is known as <em>Runge’s phenomenon</em>.
+        </p>
+
+        <p class="lead">
+          The oscillations are not inevitable. Choosing interpolation points
+          more carefully -- for example, clustering them near the endpoints as
+          in Chebyshev nodes -- can reduce the instability.
+        </p>
+
+        <p class="lead">But the polynomial remains global.</p>
+
+        <p class="lead">
+          It improves in some regions and deteriorates in others because a
+          single expression must accommodate the entire domain at once.
+        </p>
+
+        <p class="lead">The issue is not smoothness, and not even degree.</p>
+
+        <p class="lead">
+          It is the insistence on using one polynomial everywhere.
+        </p>
+
+        <p class="lead">
+          What if we allowed ourselves to use many smaller ones instead?
+        </p>
+
+        <!-- Act IV — Structure -->
+        <h2 class="text-center my-4">Enter Splines</h2>
+
+        <p class="lead">
+          Instead of increasing the degree indefinitely, we could divide the
+          domain into smaller pieces and allow a different low-degree polynomial
+          on each.
+        </p>
+
+        <p class="lead">
+          The curve would still be described by finitely many numbers. But now
+          those numbers control local behavior rather than the entire domain.
+        </p>
+
+        <div class="interactive-wide">
+          <section data-component="components/splines.html"></section>
+        </div>
+
+        <p class="small text-muted mb-4 text-center">
+          Compare a single high-degree polynomial with a piecewise cubic spline.
+        </p>
+
+        <p class="lead">Each segment is simple.</p>
+
+        <p class="lead">Smoothness is enforced where the pieces meet.</p>
+
+        <p class="lead">
+          The representation is still finite-dimensional — but its structure has
+          changed.
+        </p>
+
+        <p class="lead">
+          Flexibility now comes from adding segments, not from increasing a
+          single global degree.
+        </p>
+
+        <p class="lead">
+          This is the idea behind spline methods, including Bézier curves and
+          B-splines.
+        </p>
+
+        <p class="lead">The oscillations disappear.</p>
+
+        <p class="lead">The approximation becomes stable.</p>
+
+        <p class="lead">It is tempting to think the problem is solved.</p>
+
+        <p class="lead">But the space is still finite.</p>
+
+        <p class="lead">What kinds of curves resist even this structure?</p>
+
+        <!-- Act V — Limitation -->
+        <h2 class="text-center my-4">A Stress Test</h2>
+
+        <p class="lead">
+          Splines change the structure. They replace one global polynomial with
+          many local ones.
+        </p>
+
+        <p class="lead">
+          The approximation becomes stable. And the oscillations disappear.
+        </p>
+
+        <p class="lead">But the representation is still finite.</p>
+
+        <p class="lead">
+          What happens if we test it against a curve whose structure persists at
+          every scale?
+        </p>
+
+        <p class="lead">
+          Consider the logarithmic spiral — the kind we see with the Fibonacci
+          sequence and the golden ratio.
+        </p>
+
+        <div class="interactive-wide">
+          <section
+            data-component="components/approximate-infinite.html"
+          ></section>
+        </div>
+
+        <p class="lead">
+          As we add more segments, the spline approximation improves.
+        </p>
+
+        <p class="lead">
+          And yet, no matter how far we zoom, the spiral continues.
+        </p>
+
+        <p class="lead">Its growth is scale-invariant.</p>
+
+        <p class="lead">The spline remains finite.</p>
+
+        <p class="lead">
+          So although, stability is restored -- finiteness remains.
+        </p>
+
+        <!-- Act VI — Aliasing -->
+        <h2 class="text-center my-4">The Ambiguity of Finite Samples</h2>
+
+        <p class="lead">
+          There is also a consequence of finiteness.
+        </p>
+
+        <p class="lead">
+          Every time we commit to a finite set of sample points, we discard
+          information about everything in between.
+        </p>
+
+        <p class="lead">
+          Given only finitely many measurements, infinitely many different
+          curves pass through them exactly.
+        </p>
+
+        <p class="lead">
+          Two fundamentally different signals can produce identical values at
+          every sample point.
+        </p>
+
+        <p class="lead">A representation committed to those points alone
+        cannot tell them apart.</p>
+                
+        <p class="lead">This is what is known as aliasing.</p>
+
+        <div class="interactive-wide">
+          <section data-component="components/aliasing.html"></section>
+        </div>
+
+        <p class="small text-muted mb-4 text-center">
+          Both curves pass through all N sample points. Given only the red
+          dots, it is impossible to determine which signal produced them.
+        </p>
+
+        <p class="lead">
+          The polynomial interpolation we explored was not immune to this.
+        </p>
+
+        <p class="lead"> A degree n polynomial through n + 1 points is unique
+          within its family but infinitely many other functions agree on
+          those same points.
+        </p>
+
+        <p class="lead">
+          Runge's phenomenon from before was a form of aliasing. 
+        </p>
+
+        <p class ="lead">
+          Near the boundaries, the polynomial read a sparse set of sample values and inferred behavior
+          that was not there, oscillating into frequencies the true curve
+          never contained.
+        </p>
+
+        <p class="lead">
+          Splines narrowed the effect. Working locally, each segment has fewer
+          points to misread. But each segment is still a cubic, and can only
+          resolve variation at scales coarser than its width.
+        </p>
+
+        <p class="lead">
+          Adding more sample points raises the threshold but it cannot
+          eliminate aliasing. It only pushes the ambiguity even more.
+        </p>
+
+        <p class="lead">
+          Finiteness doesn't merely limit how precisely we can approximate but it
+          can also create ambiguity about what is being approximated at all.
+        </p>
+
+        <h2 class="text-center my-4">From Curves to Computation</h2>
+
+        <p class="lead">All of this may feel abstract.</p>
+
+        <p class="lead">
+          But these choices — global vs local, finite vs infinite — appear every
+          time a computer handles geometry or functions.
+        </p>
+
+        <p class="lead">
+          In CAD systems, smooth surfaces are represented by spline patches,
+          then approximated again as triangle meshes for rendering and printing.
+        </p>
+
+        <p class="lead">
+          In neural networks, functions are approximated using finitely many
+          parameters learned from data.
+        </p>
+
+        <p class="lead">
+          The mathematics changes form. The constraint does not.
+        </p>
+
+        <p class="lead">Smooth structure, finite parameters.</p>
+
+        <div class="interactive-wide mt-5">
+          <section
+            data-component="components/curves-to-computation.html"
+          ></section>
+        </div>
+      </article>
+    </main>
+
+    <script src="https://cdn.jsdelivr.net/npm/d3@7/dist/d3.min.js"></script>
+    <script
+      src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"
+      crossorigin="anonymous"
+    ></script>
+    <script src="https://cdn.jsdelivr.net/npm/three@0.161.0/build/three.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.js"></script>
+
+    <script>
+      const interactionScripts = [
+        "js/building_polynomial.js",
+        "js/approximate_this_function.js",
+        "js/runge_phenomenon.js",
+        "js/splines.js",
+        "js/approximate_infinite.js",
+        "js/aliasing.js",
+        "js/cad.js",
+        "js/neural_networks.js",
+      ];
+
+      async function loadComponents() {
+        while (true) {
+          const slots = Array.from(
+            document.querySelectorAll("[data-component]:not([data-loaded])"),
+          );
+          if (slots.length === 0) return;
+
+          await Promise.all(
+            slots.map(async (slot) => {
+              const url = slot.getAttribute("data-component");
+              if (!url) {
+                slot.setAttribute("data-loaded", "true");
+                return;
+              }
+
+              const response = await fetch(url);
+              if (!response.ok) {
+                throw new Error(`Failed to load component: ${url}`);
+              }
+
+              slot.innerHTML = await response.text();
+              slot.setAttribute("data-loaded", "true");
+            }),
+          );
+        }
+      }
+
+      function loadScript(src) {
+        return new Promise((resolve, reject) => {
+          const script = document.createElement("script");
+          script.src = src;
+          script.onload = resolve;
+          script.onerror = () =>
+            reject(new Error(`Failed to load script: ${src}`));
+          document.body.appendChild(script);
+        });
+      }
+
+      async function bootstrapPage() {
+        await loadComponents();
+        for (const src of interactionScripts) {
+          await loadScript(src);
+        }
+      }
+
+      bootstrapPage().catch((error) => {
+        console.error(error);
+      });
+    </script>
+  </body>
+</html>

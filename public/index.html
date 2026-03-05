@@ -16,281 +16,321 @@
   <script src="https://unpkg.com/scrollama@3.2.0/build/scrollama.min.js"></script>
 
   <style>
-    :root {
-      --bg:      #080a0f;
-      --bg-card: #0d0f18;
-      --bg-hi:   #141720;
-      --ink:     #f0ead8;
-      --ink2:    #b8afa0;
-      --ink3:    #5a5248;
-      --amber:   #c8973a;
-      --amberD:  #6b4f1e;
-      --amberBg: rgba(200,151,58,0.10);
-      --crimson: #9b2335;
-      --steel:   #4e7fa8;
-      --olive:   #5a8a5a;
-      --border:  rgba(200,151,58,0.18);
-      --borderF: rgba(200,151,58,0.07);
-      --sea:     #080d14;
-      --land:    #141c24;
-      --edge:    #252e3a;
-      --ffD: 'Playfair Display SC', Georgia, serif;
-      --ffB: 'Playfair Display', Georgia, serif;
-      --ffM: 'IBM Plex Mono', 'Courier New', monospace;
+    :root {  /* Opens the CSS custom-properties block — variables declared here are available to every element on the page */
+      --bg:      #080a0f;  /* Deepest page background — near-black with a cold blue-black tint */
+      --bg-card: #0d0f18;  /* Card / panel background — one shade lighter than the page background */
+      --bg-hi:   #141720;  /* Elevated surface color used for code blocks and hover backdrops */
+      --ink:     #f0ead8;  /* Primary text color — warm off-white to reduce eye strain on dark backgrounds */
+      --ink2:    #b8afa0;  /* Secondary / muted text — warm gray for captions, axis labels, and descriptions */
+      --ink3:    #5a5248;  /* Tertiary text / divider color — barely-visible warm dark gray */
+      --amber:   #c8973a;  /* Brand accent — muted gold used for highlights, headings, and interactive affordances */
+      --amberD:  #6b4f1e;  /* Darker amber for secondary borders and left-border accents on cards */
+      --amberBg: rgba(200,151,58,0.10);  /* Very subtle amber wash for active chip / hover backgrounds */
+      --crimson: #9b2335;  /* Deep crimson — used for Europe region and the WWI-WWII era color */
+      --steel:   #4e7fa8;  /* Muted steel blue — Contemporary era and Asia region color */
+      --olive:   #5a8a5a;  /* Muted olive green — Sub-Saharan Africa region color */
+      --border:  rgba(200,151,58,0.18);  /* Faint amber border stroke for cards and section dividers */
+      --borderF: rgba(200,151,58,0.07);  /* Even fainter amber border for subtle internal separators */
+      --sea:     #080d14;  /* Ocean fill on all maps — darkest blue-black */
+      --land:    #141c24;  /* Land-mass fill on all maps — slightly lighter dark navy */
+      --edge:    #252e3a;  /* Country border stroke on maps — medium dark blue-gray */
+      --ffD: 'Playfair Display SC', Georgia, serif;  /* Display / small-caps serif font stack used for chapter headings and big stat numbers */
+      --ffB: 'Playfair Display', Georgia, serif;  /* Body serif font stack for running paragraph text and subtitles */
+      --ffM: 'IBM Plex Mono', 'Courier New', monospace;  /* Monospace font stack for data labels, era tags, and toolbar text */
     }
 
-    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
-    html { scroll-behavior: smooth; }
-    body { background: var(--bg); color: var(--ink); font-family: var(--ffB); line-height: 1.75; overflow-x: hidden; }
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }  /* Universal reset: makes every element use border-box sizing and strips all default margins/paddings */
+    html { scroll-behavior: smooth; }  /* Enables CSS smooth-scrolling for anchor links and programmatic scrollTo() calls */
+    body { background: var(--bg); color: var(--ink); font-family: var(--ffB); line-height: 1.75; overflow-x: hidden; }  /* Page body defaults: dark background, warm-white text, serif font, generous line-height, no horizontal scroll */
     body::after {
-      content: ''; position: fixed; inset: 0; pointer-events: none; z-index: 9999; opacity: 0.35;
-      background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='256' height='256'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.8' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='0.045'/%3E%3C/svg%3E");
+      content: ''; position: fixed; inset: 0; pointer-events: none; z-index: 9999; opacity: 0.35;  /* Pseudo-element that sits above everything but doesn't block clicks; creates the film-grain texture overlay */
+      background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='256' height='256'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.8' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='0.045'/%3E%3C/svg%3E");  /* Inline SVG data URI that generates a fractalNoise filter — produces the subtle film-grain effect */
     }
 
     /* Loading */
-    #loading { position: fixed; inset: 0; background: var(--bg); display: flex; flex-direction: column; align-items: center; justify-content: center; z-index: 9998; transition: opacity 0.9s ease; }
-    #l-title { font-family: var(--ffD); font-size: 1.4rem; color: var(--amber); letter-spacing: 0.05em; margin-bottom: 0.9rem; }
-    #l-msg   { font-family: var(--ffM); font-size: 0.63rem; letter-spacing: 0.2em; text-transform: uppercase; color: var(--ink2); min-height: 1.2em; text-align: center; max-width: 380px; }
-    #l-track { width: 240px; height: 2px; background: var(--ink3); margin-top: 1.2rem; }
-    #l-fill  { height: 100%; background: var(--amber); width: 0%; transition: width 0.3s; }
+    #loading { position: fixed; inset: 0; background: var(--bg); display: flex; flex-direction: column; align-items: center; justify-content: center; z-index: 9998; transition: opacity 0.9s ease; }  /* Full-screen loading overlay: covers everything, stacks children vertically centered, fades out over 0.9 s when dismissed */
+    #l-title { font-family: var(--ffD); font-size: 1.4rem; color: var(--amber); letter-spacing: 0.05em; margin-bottom: 0.9rem; }  /* Loading overlay headline ('Loading Battle Records') — display font, amber color, slight letter-spacing */
+    #l-msg   { font-family: var(--ffM); font-size: 0.63rem; letter-spacing: 0.2em; text-transform: uppercase; color: var(--ink2); min-height: 1.2em; text-align: center; max-width: 380px; }  /* Status message line under the title — monospace, uppercase, reserved min-height prevents layout shift as text changes */
+    #l-track { width: 240px; height: 2px; background: var(--ink3); margin-top: 1.2rem; }  /* Progress bar track — thin 2px line, dark gray background */
+    #l-fill  { height: 100%; background: var(--amber); width: 0%; transition: width 0.3s; }  /* Progress bar fill — amber, starts at 0%, animates to the current percentage via setProgress() */
 
     /* Hero */
-    #hero { min-height: 100vh; display: grid; grid-template-columns: 1fr 1fr; border-bottom: 1px solid var(--border); position: relative; overflow: hidden; }
-    #hero::before { content: ''; position: absolute; inset: 0; background-image: linear-gradient(rgba(200,151,58,0.04) 1px, transparent 1px), linear-gradient(90deg, rgba(200,151,58,0.04) 1px, transparent 1px); background-size: 52px 52px; }
-    #hero-text { display: flex; flex-direction: column; justify-content: center; padding: 8rem 5vw 6rem 8vw; position: relative; z-index: 2; }
-    .overline { font-family: var(--ffM); font-size: 0.65rem; letter-spacing: 0.28em; text-transform: uppercase; color: var(--amber); margin-bottom: 1.6rem; opacity: 0; animation: riseIn 0.8s ease 0.1s forwards; }
-    h1 { font-family: var(--ffD); font-size: clamp(2.8rem, 5.5vw, 5.2rem); font-weight: 700; line-height: 1.0; color: var(--ink); margin-bottom: 1.5rem; opacity: 0; animation: riseIn 0.8s ease 0.3s forwards; }
-    h1 em { font-style: italic; color: var(--amber); font-family: var(--ffB); }
-    .lede { font-size: 1.05rem; font-style: italic; color: var(--ink2); max-width: 48ch; margin-bottom: 2.5rem; opacity: 0; animation: riseIn 0.8s ease 0.5s forwards; }
-    .hero-stats { display: grid; grid-template-columns: repeat(3, 1fr); gap: 1.2rem; opacity: 0; animation: riseIn 0.8s ease 0.7s forwards; }
-    .stat { border-left: 2px solid var(--amberD); padding-left: 1rem; }
-    .stat-n { font-family: var(--ffD); font-size: 1.9rem; color: var(--amber); line-height: 1; }
-    .stat-l { font-family: var(--ffM); font-size: 0.58rem; letter-spacing: 0.14em; text-transform: uppercase; color: var(--ink2); margin-top: 0.2rem; }
-    #hero-map { position: relative; overflow: hidden; }
-    #hero-map::before { content: ''; position: absolute; inset: 0; z-index: 1; background: linear-gradient(90deg, var(--bg) 0%, transparent 25%, transparent 75%, var(--bg) 100%), linear-gradient(0deg, var(--bg) 0%, transparent 15%, transparent 85%, var(--bg) 100%); pointer-events: none; }
-    #hero-svg { width: 100%; height: 100%; display: block; opacity: 0; animation: fadeIn 1.5s ease 1s forwards; }
-    .scroll-hint { position: absolute; bottom: 2rem; left: 50%; transform: translateX(-50%); z-index: 10; display: flex; flex-direction: column; align-items: center; gap: 0.4rem; opacity: 0; animation: riseIn 1s ease 1.6s forwards; }
-    .scroll-hint span { font-family: var(--ffM); font-size: 0.58rem; letter-spacing: 0.24em; text-transform: uppercase; color: var(--ink3); }
-    .scroll-bar { width: 1px; height: 44px; background: linear-gradient(var(--amber), transparent); animation: drip 2s ease-in-out infinite; }
-    @keyframes riseIn { from { opacity: 0; transform: translateY(18px); } to { opacity: 1; transform: translateY(0); } }
-    @keyframes fadeIn  { from { opacity: 0; } to { opacity: 1; } }
-    @keyframes drip { 0% { transform: scaleY(0); transform-origin: top; } 50% { transform: scaleY(1); transform-origin: top; } 51% { transform: scaleY(1); transform-origin: bottom; } 100% { transform: scaleY(0); transform-origin: bottom; } }
+    #hero { min-height: 100vh; display: grid; grid-template-columns: 1fr 1fr; border-bottom: 1px solid var(--border); position: relative; overflow: hidden; }  /* Hero section: full-viewport-height two-column grid (text left, map right), amber border bottom */
+    #hero::before { content: ''; position: absolute; inset: 0; background-image: linear-gradient(rgba(200,151,58,0.04) 1px, transparent 1px), linear-gradient(90deg, rgba(200,151,58,0.04) 1px, transparent 1px); background-size: 52px 52px; }  /* Decorative amber grid overlay on the hero section — very faint 52px cross-hatching for a cartographic feel */
+    #hero-text { display: flex; flex-direction: column; justify-content: center; padding: 8rem 5vw 6rem 8vw; position: relative; z-index: 2; }  /* Left hero panel: flexbox column, vertically centered, generous viewport-relative padding, above the grid pseudo-element */
+    .overline { font-family: var(--ffM); font-size: 0.65rem; letter-spacing: 0.28em; text-transform: uppercase; color: var(--amber); margin-bottom: 1.6rem; opacity: 0; animation: riseIn 0.8s ease 0.1s forwards; }  /* Small uppercase eyebrow label above the title — fades/rises in after 0.1 s delay */
+    h1 { font-family: var(--ffD); font-size: clamp(2.8rem, 5.5vw, 5.2rem); font-weight: 700; line-height: 1.0; color: var(--ink); margin-bottom: 1.5rem; opacity: 0; animation: riseIn 0.8s ease 0.3s forwards; }  /* Hero h1: fluid font size between 2.8rem–5.2rem, tight line-height, fades in after 0.3 s */
+    h1 em { font-style: italic; color: var(--amber); font-family: var(--ffB); }  /* Italic emphasis inside the h1 ('Cartography') is styled in amber using the non-SC Playfair variant */
+    .lede { font-size: 1.05rem; font-style: italic; color: var(--ink2); max-width: 48ch; margin-bottom: 2.5rem; opacity: 0; animation: riseIn 0.8s ease 0.5s forwards; }  /* Hero lead paragraph: slightly italic, muted color, 48-character max width, fades in after 0.5 s */
+    .hero-stats { display: grid; grid-template-columns: repeat(3, 1fr); gap: 1.2rem; opacity: 0; animation: riseIn 0.8s ease 0.7s forwards; }  /* Three-column stat grid below the lede — fades in last, after 0.7 s */
+    .stat { border-left: 2px solid var(--amberD); padding-left: 1rem; }  /* Individual stat card: amber left-border accent + left padding */
+    .stat-n { font-family: var(--ffD); font-size: 1.9rem; color: var(--amber); line-height: 1; }  /* Large number inside a stat card — display font, amber, tight line-height */
+    .stat-l { font-family: var(--ffM); font-size: 0.58rem; letter-spacing: 0.14em; text-transform: uppercase; color: var(--ink2); margin-top: 0.2rem; }  /* Label below a stat number — tiny monospace uppercase caption */
+    #hero-map { position: relative; overflow: hidden; }  /* Right hero panel: relative positioning to allow the fade gradient pseudo-element to sit on top */
+    #hero-map::before { content: ''; position: absolute; inset: 0; z-index: 1; background: linear-gradient(90deg, var(--bg) 0%, transparent 25%, transparent 75%, var(--bg) 100%), linear-gradient(0deg, var(--bg) 0%, transparent 15%, transparent 85%, var(--bg) 100%); pointer-events: none; }  /* Vignette gradient that fades the map into the page background on all four edges, softening the hard crop */
+    #hero-svg { width: 100%; height: 100%; display: block; opacity: 0; animation: fadeIn 1.5s ease 1s forwards; }  /* Hero map SVG: fills its container, fades in slowly after 1 s for a dramatic reveal */
+    .scroll-hint { position: absolute; bottom: 2rem; left: 50%; transform: translateX(-50%); z-index: 10; display: flex; flex-direction: column; align-items: center; gap: 0.4rem; opacity: 0; animation: riseIn 1s ease 1.6s forwards; }  /* 'Scroll to explore' indicator at bottom-center of the hero — fades in last at 1.6 s delay */
+    .scroll-hint span { font-family: var(--ffM); font-size: 0.58rem; letter-spacing: 0.24em; text-transform: uppercase; color: var(--ink3); }  /* Tiny uppercase label inside the scroll hint */
+    .scroll-bar { width: 1px; height: 44px; background: linear-gradient(var(--amber), transparent); animation: drip 2s ease-in-out infinite; }  /* Animated vertical amber line that 'drips' downward to invite scrolling */
+    @keyframes riseIn { from { opacity: 0; transform: translateY(18px); } to { opacity: 1; transform: translateY(0); } }  /* Keyframe: elements start 18px below and invisible, animate to full opacity and natural position */
+    @keyframes fadeIn  { from { opacity: 0; } to { opacity: 1; } }  /* Simple opacity fade-in keyframe used for the hero SVG */
+    @keyframes drip { 0% { transform: scaleY(0); transform-origin: top; } 50% { transform: scaleY(1); transform-origin: top; } 51% { transform: scaleY(1); transform-origin: bottom; } 100% { transform: scaleY(0); transform-origin: bottom; } }  /* Drip keyframe: bar grows from top, then shrinks from bottom — simulates a drop falling down */
 
     /* Chapter headings */
-    .ch-head { padding: 5rem 8vw 2rem; border-top: 1px solid var(--border); }
-    .ch-tag   { font-family: var(--ffM); font-size: 0.62rem; letter-spacing: 0.3em; text-transform: uppercase; color: var(--amber); margin-bottom: 0.5rem; }
-    .ch-title { font-family: var(--ffD); font-size: clamp(2rem, 4vw, 3.5rem); font-weight: 700; color: var(--ink); line-height: 1.05; }
-    .ch-desc  { font-size: 1rem; font-style: italic; color: var(--ink2); margin-top: 0.7rem; max-width: 62ch; }
+    .ch-head { padding: 5rem 8vw 2rem; border-top: 1px solid var(--border); }  /* Chapter header container: generous vertical padding, viewport-relative horizontal padding, amber top border */
+    .ch-tag   { font-family: var(--ffM); font-size: 0.62rem; letter-spacing: 0.3em; text-transform: uppercase; color: var(--amber); margin-bottom: 0.5rem; }  /* Chapter label ('Chapter I', 'Chapter II', …) — tiny amber monospace uppercase eyebrow */
+    .ch-title { font-family: var(--ffD); font-size: clamp(2rem, 4vw, 3.5rem); font-weight: 700; color: var(--ink); line-height: 1.05; }  /* Chapter title: fluid display font between 2rem–3.5rem, tight line-height */
+    .ch-desc  { font-size: 1rem; font-style: italic; color: var(--ink2); margin-top: 0.7rem; max-width: 62ch; }  /* Chapter subtitle: italic, muted, limited to 62 characters wide for readability */
 
     /* Scrolly */
-    #scrolly { display: flex; position: relative; }
-    #sticky-pane { position: sticky; top: 0; height: 100vh; width: 62%; flex-shrink: 0; display: flex; flex-direction: column; padding: 1rem 1.5rem 1.2rem; background: var(--bg); }
-    .era-legend { display: flex; flex-wrap: wrap; gap: 0.25rem 1.1rem; padding: 0.2rem 0 0.4rem; }
-    .era-key { display: flex; align-items: center; gap: 0.38rem; font-family: var(--ffM); font-size: 0.58rem; letter-spacing: 0.1em; text-transform: uppercase; color: var(--ink2); }
-    .era-swatch { width: 7px; height: 7px; border-radius: 50%; flex-shrink: 0; }
-    #scrolly-svg { width: 100%; height: 100%; display: block; }
-    #year-badge { font-family: var(--ffD); font-weight: 700; font-size: 3.5rem; line-height: 1; color: rgba(200,151,58,0.1); text-align: center; letter-spacing: 0.08em; padding-bottom: 0.4rem; pointer-events: none; transition: color 0.5s; }
-    #centroid-info { font-family: var(--ffM); font-size: 0.58rem; letter-spacing: 0.12em; text-transform: uppercase; color: var(--ink3); text-align: center; margin-top: -0.2rem; padding-bottom: 0.3rem; min-height: 1.1em; transition: color 0.4s; }
-    #steps-pane { width: 38%; padding: 0 5vw 0 3vw; flex-shrink: 0; }
-    .step { min-height: 90vh; display: flex; align-items: center; }
-    .step:first-child { padding-top: 15vh; }
-    .step:last-child  { padding-bottom: 25vh; }
-    .step-card { border: 1px solid var(--border); border-left: 3px solid var(--amberD); background: rgba(13,15,24,0.95); padding: 1.7rem 1.5rem; backdrop-filter: blur(10px); opacity: 0.18; transform: translateX(14px); transition: opacity 0.45s ease, transform 0.45s ease, border-left-color 0.4s; }
-    .step.is-active .step-card { opacity: 1; transform: translateX(0); border-left-color: var(--amber); }
-    .step-num   { font-family: var(--ffM); font-size: 0.6rem; letter-spacing: 0.22em; text-transform: uppercase; color: var(--amber); margin-bottom: 0.35rem; }
-    .step-title { font-family: var(--ffD); font-size: 1.45rem; color: var(--ink); line-height: 1.15; margin-bottom: 0.7rem; }
-    .step-body  { font-size: 0.9rem; color: var(--ink2); line-height: 1.72; }
-    .step-body strong { color: var(--amber); font-weight: 700; }
-    .centroid-callout { margin-top: 0.8rem; padding: 0.5rem 0.7rem; background: rgba(200,151,58,0.06); border-left: 2px solid var(--amberD); font-family: var(--ffM); font-size: 0.58rem; letter-spacing: 0.1em; text-transform: uppercase; color: var(--ink3); }
-    .centroid-callout span { color: var(--amber); }
+    #scrolly { display: flex; position: relative; }  /* Scrollytelling section container: horizontal flex row so the sticky map and steps panels sit side by side */
+    #sticky-pane { position: sticky; top: 0; height: 100vh; width: 62%; flex-shrink: 0; display: flex; flex-direction: column; padding: 1rem 1.5rem 1.2rem; background: var(--bg); }  /* Left sticky map panel: sticks to top of viewport during scroll, 62% width, dark background */
+    .era-legend { display: flex; flex-wrap: wrap; gap: 0.25rem 1.1rem; padding: 0.2rem 0 0.4rem; }  /* Era color legend row above the scrolly map — wraps if narrow */
+    .era-key { display: flex; align-items: center; gap: 0.38rem; font-family: var(--ffM); font-size: 0.58rem; letter-spacing: 0.1em; text-transform: uppercase; color: var(--ink2); }  /* Individual era legend item: swatch + label in a tiny monospace row */
+    .era-swatch { width: 7px; height: 7px; border-radius: 50%; flex-shrink: 0; }  /* Colored circle swatch for each era in the legend */
+    #scrolly-svg { width: 100%; height: 100%; display: block; }  /* Scrolly map SVG: fills the sticky pane completely */
+    #year-badge { font-family: var(--ffD); font-weight: 700; font-size: 3.5rem; line-height: 1; color: rgba(200,151,58,0.1); text-align: center; letter-spacing: 0.08em; padding-bottom: 0.4rem; pointer-events: none; transition: color 0.5s; }  /* Large era label watermark below the map (e.g. 'Ancient') — very faint amber, no mouse events, fades between eras */
+    #centroid-info { font-family: var(--ffM); font-size: 0.58rem; letter-spacing: 0.12em; text-transform: uppercase; color: var(--ink3); text-align: center; margin-top: -0.2rem; padding-bottom: 0.3rem; min-height: 1.1em; transition: color 0.4s; }  /* Centroid coordinate readout beneath the year badge — monospace, uppercase, color transitions with era */
+    #steps-pane { width: 38%; padding: 0 5vw 0 3vw; flex-shrink: 0; }  /* Right narrative steps panel: 38% width, viewport-relative side padding */
+    .step { min-height: 90vh; display: flex; align-items: center; }  /* Each scroll step occupies 90% of the viewport height so only one card is visible at a time */
+    .step:first-child { padding-top: 15vh; }  /* Extra top padding on the first step to offset initial scroll position */
+    .step:last-child  { padding-bottom: 25vh; }  /* Extra bottom padding after the last step so the user can fully scroll it into view */
+    .step-card { border: 1px solid var(--border); border-left: 3px solid var(--amberD); background: rgba(13,15,24,0.95); padding: 1.7rem 1.5rem; backdrop-filter: blur(10px); opacity: 0.18; transform: translateX(14px); transition: opacity 0.45s ease, transform 0.45s ease, border-left-color 0.4s; }  /* Narrative card: semi-transparent dark background with blur, offset and near-invisible until active */
+    .step.is-active .step-card { opacity: 1; transform: translateX(0); border-left-color: var(--amber); }  /* Active step: card slides left to natural position, becomes fully opaque, left border brightens to amber */
+    .step-num   { font-family: var(--ffM); font-size: 0.6rem; letter-spacing: 0.22em; text-transform: uppercase; color: var(--amber); margin-bottom: 0.35rem; }  /* Step number tag ('01 — Before 500 AD') — tiny monospace amber label */
+    .step-title { font-family: var(--ffD); font-size: 1.45rem; color: var(--ink); line-height: 1.15; margin-bottom: 0.7rem; }  /* Step card heading: display serif, off-white, tight line-height */
+    .step-body  { font-size: 0.9rem; color: var(--ink2); line-height: 1.72; }  /* Step narrative body text: muted, slightly smaller than base, generous line-height */
+    .step-body strong { color: var(--amber); font-weight: 700; }  /* Bold text inside step body renders in amber to highlight key geographic/historical points */
+    .centroid-callout { margin-top: 0.8rem; padding: 0.5rem 0.7rem; background: rgba(200,151,58,0.06); border-left: 2px solid var(--amberD); font-family: var(--ffM); font-size: 0.58rem; letter-spacing: 0.1em; text-transform: uppercase; color: var(--ink3); }  /* Small data callout inside step body showing the centroid coordinates for that era */
+    .centroid-callout span { color: var(--amber); }  /* Highlights the actual coordinate value inside the callout in amber */
 
     /* Explore map */
-    #explore-wrap { margin: 1rem 8vw 0; border: 1px solid var(--border); background: var(--bg-card); }
-    #toolbar { display: flex; align-items: center; gap: 0.85rem; flex-wrap: wrap; padding: 0.9rem 1.3rem; border-bottom: 1px solid var(--borderF); }
-    .btn { font-family: var(--ffM); font-size: 0.68rem; letter-spacing: 0.14em; text-transform: uppercase; border: 1px solid var(--amberD); background: transparent; color: var(--amber); padding: 0.38rem 1rem; cursor: pointer; flex-shrink: 0; transition: background 0.18s, color 0.18s; }
-    .btn:hover { background: var(--amber); color: var(--bg); }
-    .btn-g { border-color: var(--ink3); color: var(--ink2); }
-    .btn-g:hover { background: var(--ink3); color: var(--ink); }
-    #slider-wrap { flex: 1; display: flex; align-items: center; gap: 0.7rem; min-width: 160px; }
-    #yr-slider { flex: 1; -webkit-appearance: none; height: 2px; background: var(--ink3); outline: none; }
-    #yr-slider::-webkit-slider-thumb { -webkit-appearance: none; width: 13px; height: 13px; border-radius: 50%; background: var(--amber); border: 2px solid var(--bg); cursor: pointer; box-shadow: 0 0 7px rgba(200,151,58,0.5); }
-    #yr-label { font-family: var(--ffD); font-size: 1.9rem; color: var(--amber); min-width: 5ch; text-align: right; letter-spacing: 0.05em; }
-    #filter-row { display: flex; align-items: center; flex-wrap: wrap; gap: 0.4rem; padding: 0.65rem 1.3rem; border-bottom: 1px solid var(--borderF); }
-    .flabel { font-family: var(--ffM); font-size: 0.58rem; letter-spacing: 0.16em; text-transform: uppercase; color: var(--ink2); margin-right: 0.3rem; }
-    .chip { font-family: var(--ffM); font-size: 0.58rem; letter-spacing: 0.08em; text-transform: uppercase; border: 1px solid var(--ink3); background: transparent; color: var(--ink2); padding: 0.22rem 0.65rem; cursor: pointer; transition: all 0.18s; }
-    .chip:hover, .chip.on { border-color: var(--amberD); color: var(--amber); background: var(--amberBg); }
-    #tally { margin-left: auto; font-family: var(--ffM); font-size: 0.58rem; letter-spacing: 0.12em; text-transform: uppercase; color: var(--ink2); }
-    #tally span { color: var(--amber); }
-    #explore-svg { width: 100%; display: block; }
-    .map-note { font-family: var(--ffM); font-size: 0.55rem; letter-spacing: 0.1em; text-transform: uppercase; color: var(--ink3); text-align: right; padding: 0.3rem 1rem 0.5rem; }
+    #explore-wrap { margin: 1rem 8vw 0; border: 1px solid var(--border); background: var(--bg-card); }  /* Explorer map outer wrapper: card-style with amber border and card background */
+    #toolbar { display: flex; align-items: center; gap: 0.85rem; flex-wrap: wrap; padding: 0.9rem 1.3rem; border-bottom: 1px solid var(--borderF); }  /* Playback toolbar row above the explore map: flex row, wraps on small screens, faint bottom border */
+    .btn { font-family: var(--ffM); font-size: 0.68rem; letter-spacing: 0.14em; text-transform: uppercase; border: 1px solid var(--amberD); background: transparent; color: var(--amber); padding: 0.38rem 1rem; cursor: pointer; flex-shrink: 0; transition: background 0.18s, color 0.18s; }  /* Primary button style: transparent amber-bordered monospace button that fills with amber on hover */
+    .btn:hover { background: var(--amber); color: var(--bg); }  /* Button hover: inverts to amber fill with dark text */
+    .btn-g { border-color: var(--ink3); color: var(--ink2); }  /* Secondary (gray) button variant: dark-gray border and muted-text color */
+    .btn-g:hover { background: var(--ink3); color: var(--ink); }  /* Gray button hover: fills with the muted border color and uses primary text */
+    #slider-wrap { flex: 1; display: flex; align-items: center; gap: 0.7rem; min-width: 160px; }  /* Year slider container: grows to fill available toolbar space, with a minimum width */
+    #yr-slider { flex: 1; -webkit-appearance: none; height: 2px; background: var(--ink3); outline: none; }  /* Range input track: removes browser default styling, 2px tall dark track */
+    #yr-slider::-webkit-slider-thumb { -webkit-appearance: none; width: 13px; height: 13px; border-radius: 50%; background: var(--amber); border: 2px solid var(--bg); cursor: pointer; box-shadow: 0 0 7px rgba(200,151,58,0.5); }  /* Custom slider thumb: amber circle with dark border and glow shadow */
+    #yr-label { font-family: var(--ffD); font-size: 1.9rem; color: var(--amber); min-width: 5ch; text-align: right; letter-spacing: 0.05em; }  /* Year readout to the right of the slider (e.g. '500 BC') — large display font, amber */
+    #filter-row { display: flex; align-items: center; flex-wrap: wrap; gap: 0.4rem; padding: 0.65rem 1.3rem; border-bottom: 1px solid var(--borderF); }  /* Region filter chip row below the toolbar — wraps and has a faint bottom border */
+    .flabel { font-family: var(--ffM); font-size: 0.58rem; letter-spacing: 0.16em; text-transform: uppercase; color: var(--ink2); margin-right: 0.3rem; }  /* 'Region:' label before the filter chips */
+    .chip { font-family: var(--ffM); font-size: 0.58rem; letter-spacing: 0.08em; text-transform: uppercase; border: 1px solid var(--ink3); background: transparent; color: var(--ink2); padding: 0.22rem 0.65rem; cursor: pointer; transition: all 0.18s; }  /* Filter chip button: compact monospace pill, dark border, muted text */
+    .chip:hover, .chip.on { border-color: var(--amberD); color: var(--amber); background: var(--amberBg); }  /* Chip hover/active state: amber border, amber text, very subtle amber background tint */
+    #tally { margin-left: auto; font-family: var(--ffM); font-size: 0.58rem; letter-spacing: 0.12em; text-transform: uppercase; color: var(--ink2); }  /* 'Showing N battles' count pushed to the far right of the filter row */
+    #tally span { color: var(--amber); }  /* The numeric count inside the tally label renders in amber for emphasis */
+    #explore-svg { width: 100%; display: block; }  /* Explorer map SVG: full-width block element */
+    .map-note { font-family: var(--ffM); font-size: 0.55rem; letter-spacing: 0.1em; text-transform: uppercase; color: var(--ink3); text-align: right; padding: 0.3rem 1rem 0.5rem; }  /* Small footnote below the explorer map explaining dot interactions */
 
     /* Charts */
-    #charts-docgap, #charts-rhythm { display: grid; grid-template-columns: 1fr 1fr; gap: 1.4rem; padding: 1rem 8vw 5rem; }
-    #charts-sankey { padding: 1rem 8vw 5rem; }
-    .chart-box { background: var(--bg-card); border: 1px solid var(--border); padding: 1.6rem; }
-    .chart-box.wide { grid-column: span 2; }
-    .chart-title { font-family: var(--ffD); font-size: 1.2rem; color: var(--ink); }
-    .chart-sub   { font-family: var(--ffM); font-size: 0.58rem; letter-spacing: 0.14em; text-transform: uppercase; color: var(--ink2); margin: 0.15rem 0 1rem; }
-    .chart-svg   { width: 100%; display: block; overflow: visible; }
-    .axis text   { fill: var(--ink2); font-family: var(--ffM); font-size: 9px; }
-    .axis line, .axis path { stroke: var(--ink3); }
-    .grid line   { stroke: rgba(255,255,255,0.04); stroke-dasharray: 2 3; }
-    .insight { display: flex; gap: 1rem; margin-bottom: 1.2rem; }
-    .insight-num { font-family: var(--ffD); font-size: 2.2rem; color: var(--amber); line-height: 1; flex-shrink: 0; }
-    .insight-txt { font-size: 0.82rem; color: var(--ink2); font-style: italic; line-height: 1.5; }
-    .insight-txt strong { color: var(--ink); font-style: normal; }
+    #charts-docgap, #charts-rhythm { display: grid; grid-template-columns: 1fr 1fr; gap: 1.4rem; padding: 1rem 8vw 5rem; }  /* Documentation-gap and Rhythm chart sections: two-column grid with viewport-relative padding */
+    #charts-sankey { padding: 1rem 8vw 5rem; }  /* Sankey/stream section padding — single column, matches other sections */
+    .chart-box { background: var(--bg-card); border: 1px solid var(--border); padding: 1.6rem; }  /* Individual chart card: dark card background with amber border and generous padding */
+    .chart-box.wide { grid-column: span 2; }  /* Wide chart variant: spans both grid columns (full width) */
+    .chart-title { font-family: var(--ffD); font-size: 1.2rem; color: var(--ink); }  /* Chart heading inside a card */
+    .chart-sub   { font-family: var(--ffM); font-size: 0.58rem; letter-spacing: 0.14em; text-transform: uppercase; color: var(--ink2); margin: 0.15rem 0 1rem; }  /* Chart sub-label/description below the title — monospace uppercase caption */
+    .chart-svg   { width: 100%; display: block; overflow: visible; }  /* SVG element inside a chart card: full width, overflow visible so axis labels don't clip */
+    .axis text   { fill: var(--ink2); font-family: var(--ffM); font-size: 9px; }  /* D3 axis tick labels: muted color, monospace font, 9px size */
+    .axis line, .axis path { stroke: var(--ink3); }  /* D3 axis lines and domain paths: faint dark-gray strokes */
+    .grid line   { stroke: rgba(255,255,255,0.04); stroke-dasharray: 2 3; }  /* Chart grid lines: barely-visible dashed white */
+    .insight { display: flex; gap: 1rem; margin-bottom: 1.2rem; }  /* Insight stat row at the top of doc-gap chart cards: number + text side by side */
+    .insight-num { font-family: var(--ffD); font-size: 2.2rem; color: var(--amber); line-height: 1; flex-shrink: 0; }  /* Large amber number in an insight row (e.g. the Europe percentage) */
+    .insight-txt { font-size: 0.82rem; color: var(--ink2); font-style: italic; line-height: 1.5; }  /* Explanatory text beside the insight number — small italic muted text */
+    .insight-txt strong { color: var(--ink); font-style: normal; }  /* Bold text inside insight description renders in primary (white-ish) color */
 
     /* Stream diagram */
-    #sankey-outer { margin: 0 8vw 5rem; border: 1px solid var(--border); background: var(--bg-card); position: relative; overflow: hidden; }
-    #sankey-toolbar { display: flex; align-items: center; gap: 1rem; padding: 0.9rem 1.3rem; border-bottom: 1px solid var(--borderF); flex-wrap: wrap; }
-    #sankey-svg { width: 100%; display: block; overflow: visible; cursor: grab; transition: opacity 0.3s; }
-    #sankey-svg:active { cursor: grabbing; }
-    .sankey-legend { display: flex; flex-wrap: wrap; gap: 0.2rem 1rem; padding: 0.6rem 1.3rem; border-top: 1px solid var(--borderF); }
-    .sleg-item { display: flex; align-items: center; gap: 0.35rem; font-family: var(--ffM); font-size: 0.55rem; letter-spacing: 0.07em; color: var(--ink2); cursor: pointer; transition: color 0.15s; }
-    .sleg-item:hover { color: var(--ink); }
-    .sleg-swatch { width: 10px; height: 6px; border-radius: 1px; flex-shrink: 0; }
+    #sankey-outer { margin: 0 8vw 5rem; border: 1px solid var(--border); background: var(--bg-card); position: relative; overflow: hidden; }  /* Stream diagram outer container: full-width card with relative positioning for the detail panel overlay */
+    #sankey-toolbar { display: flex; align-items: center; gap: 1rem; padding: 0.9rem 1.3rem; border-bottom: 1px solid var(--borderF); flex-wrap: wrap; }  /* Stream toolbar row with labels and zoom buttons */
+    #sankey-svg { width: 100%; display: block; overflow: visible; cursor: grab; transition: opacity 0.3s; }  /* Stream diagram SVG: shows grab cursor (it's pannable/zoomable), fades opacity during transitions */
+    #sankey-svg:active { cursor: grabbing; }  /* Changes cursor to 'grabbing' while the user drags the stream diagram */
+    .sankey-legend { display: flex; flex-wrap: wrap; gap: 0.2rem 1rem; padding: 0.6rem 1.3rem; border-top: 1px solid var(--borderF); }  /* War legend row below the stream diagram */
+    .sleg-item { display: flex; align-items: center; gap: 0.35rem; font-family: var(--ffM); font-size: 0.55rem; letter-spacing: 0.07em; color: var(--ink2); cursor: pointer; transition: color 0.15s; }  /* Individual war legend item: swatch + war name, clickable to drill in */
+    .sleg-item:hover { color: var(--ink); }  /* Legend item hover: brightens text to primary color */
+    .sleg-swatch { width: 10px; height: 6px; border-radius: 1px; flex-shrink: 0; }  /* War color swatch in the stream legend: short rectangular pill */
 
     /* War detail panel */
-    #war-detail { position: absolute; inset: 0; background: var(--bg-card); display: none; flex-direction: column; z-index: 20; animation: slideIn 0.35s ease forwards; }
-    #war-detail.visible { display: flex; }
-    @keyframes slideIn { from { opacity: 0; transform: translateX(30px); } to { opacity: 1; transform: translateX(0); } }
-    #war-detail-header { display: flex; align-items: center; gap: 1rem; padding: 0.9rem 1.3rem; border-bottom: 1px solid var(--borderF); flex-wrap: wrap; }
-    #back-btn { font-family: var(--ffM); font-size: 0.65rem; letter-spacing: 0.15em; text-transform: uppercase; border: 1px solid var(--amberD); background: transparent; color: var(--amber); padding: 0.32rem 0.85rem; cursor: pointer; transition: background 0.18s, color 0.18s; flex-shrink: 0; }
-    #back-btn:hover { background: var(--amber); color: var(--bg); }
-    #war-detail-title { font-family: var(--ffD); font-size: 1.1rem; color: var(--ink); }
-    #war-detail-svg { width: 100%; display: block; flex: 1; }
+    #war-detail { position: absolute; inset: 0; background: var(--bg-card); display: none; flex-direction: column; z-index: 20; animation: slideIn 0.35s ease forwards; }  /* War detail panel: slides in to cover the stream diagram when a war ribbon is clicked */
+    #war-detail.visible { display: flex; }  /* JS adds .visible class to show the detail panel */
+    @keyframes slideIn { from { opacity: 0; transform: translateX(30px); } to { opacity: 1; transform: translateX(0); } }  /* Keyframe: detail panel slides in from the right */
+    #war-detail-header { display: flex; align-items: center; gap: 1rem; padding: 0.9rem 1.3rem; border-bottom: 1px solid var(--borderF); flex-wrap: wrap; }  /* Detail panel header row: back button + war title */
+    #back-btn { font-family: var(--ffM); font-size: 0.65rem; letter-spacing: 0.15em; text-transform: uppercase; border: 1px solid var(--amberD); background: transparent; color: var(--amber); padding: 0.32rem 0.85rem; cursor: pointer; transition: background 0.18s, color 0.18s; flex-shrink: 0; }  /* '← Back to Stream' button in the war detail header */
+    #back-btn:hover { background: var(--amber); color: var(--bg); }  /* Back button hover: fills amber */
+    #war-detail-title { font-family: var(--ffD); font-size: 1.1rem; color: var(--ink); }  /* War name displayed in the detail panel header */
+    #war-detail-svg { width: 100%; display: block; flex: 1; }  /* Timeline SVG in the war detail panel: fills remaining height */
 
     /* Tooltip — pointer-events: auto so users can move the mouse onto the tooltip
        and click the Wikipedia link without it disappearing. A short grace-period
        timer is used: the tooltip only hides if the mouse is not over either the
        dot OR the tooltip itself after a brief delay. */
-    #tip { position: fixed; pointer-events: auto; z-index: 5000; background: var(--bg-hi); border: 1px solid var(--border); border-left: 3px solid var(--amber); padding: 0.9rem 1.1rem; max-width: 300px; display: none; box-shadow: 0 14px 44px rgba(0,0,0,0.75); }
-    .tt-name { font-family: var(--ffD); font-size: 1rem; color: var(--ink); margin-bottom: 0.1rem; }
-    .tt-war  { font-style: italic; font-size: 0.78rem; color: var(--amber); margin-bottom: 0.55rem; padding-bottom: 0.55rem; border-bottom: 1px solid var(--borderF); }
-    .tt-row  { display: flex; justify-content: space-between; gap: 0.8rem; padding: 0.18rem 0; }
-    .tt-k { font-family: var(--ffM); font-size: 0.6rem; letter-spacing: 0.1em; text-transform: uppercase; color: var(--ink2); flex-shrink: 0; }
-    .tt-v { color: var(--ink); font-size: 0.82rem; text-align: right; }
-    .tt-wiki { display: block; margin-top: 0.65rem; font-family: var(--ffM); font-size: 0.6rem; letter-spacing: 0.1em; text-transform: uppercase; color: var(--amber); text-decoration: none; border-top: 1px solid var(--borderF); padding-top: 0.55rem; }
-    .tt-wiki:hover { color: var(--ink); }
+    #tip { position: fixed; pointer-events: auto; z-index: 5000; background: var(--bg-hi); border: 1px solid var(--border); border-left: 3px solid var(--amber); padding: 0.9rem 1.1rem; max-width: 300px; display: none; box-shadow: 0 14px 44px rgba(0,0,0,0.75); }  /* Tooltip card: fixed position, high z-index, amber left border, shadow, hidden by default */
+    .tt-name { font-family: var(--ffD); font-size: 1rem; color: var(--ink); margin-bottom: 0.1rem; }  /* Battle name in tooltip — display font, primary color */
+    .tt-war  { font-style: italic; font-size: 0.78rem; color: var(--amber); margin-bottom: 0.55rem; padding-bottom: 0.55rem; border-bottom: 1px solid var(--borderF); }  /* War name below battle name in tooltip — italic amber with a divider line */
+    .tt-row  { display: flex; justify-content: space-between; gap: 0.8rem; padding: 0.18rem 0; }  /* Data row inside tooltip: label on left, value on right */
+    .tt-k { font-family: var(--ffM); font-size: 0.6rem; letter-spacing: 0.1em; text-transform: uppercase; color: var(--ink2); flex-shrink: 0; }  /* Tooltip row key (e.g. 'Year', 'Casualties') — tiny monospace uppercase label */
+    .tt-v { color: var(--ink); font-size: 0.82rem; text-align: right; }  /* Tooltip row value — primary text color, right-aligned */
+    .tt-wiki { display: block; margin-top: 0.65rem; font-family: var(--ffM); font-size: 0.6rem; letter-spacing: 0.1em; text-transform: uppercase; color: var(--amber); text-decoration: none; border-top: 1px solid var(--borderF); padding-top: 0.55rem; }  /* Wikipedia link at the bottom of the tooltip: amber monospace, separated by a divider */
+    .tt-wiki:hover { color: var(--ink); }  /* Wiki link hover: brightens to primary color */
 
     /* Map primitives */
-    .sphere  { fill: var(--sea); }
-    .gratc   { fill: none; stroke: rgba(200,151,58,0.05); stroke-width: 0.4; }
-    .country { fill: var(--land); stroke: var(--edge); stroke-width: 0.4; }
-    .bdot    { cursor: pointer; }
-    .bdot:hover { stroke: #fff !important; stroke-opacity: 0.7 !important; stroke-width: 1.5px !important; }
+    .sphere  { fill: var(--sea); }  /* Ocean/globe background fill on all maps — dark sea color */
+    .gratc   { fill: none; stroke: rgba(200,151,58,0.05); stroke-width: 0.4; }  /* Graticule (lat/lon grid) lines: very faint amber, thin */
+    .country { fill: var(--land); stroke: var(--edge); stroke-width: 0.4; }  /* Country land polygons: dark navy fill, subtle blue-gray border */
+    .bdot    { cursor: pointer; }  /* Battle dot: pointer cursor signals it is interactive (hoverable/clickable) */
+    .bdot:hover { stroke: #fff !important; stroke-opacity: 0.7 !important; stroke-width: 1.5px !important; }  /* Battle dot hover: adds a white halo stroke to highlight the dot under cursor */
 
     /* Zoom buttons */
-    .zoom-btns { position: absolute; bottom: 2.8rem; right: 1rem; z-index: 10; display: flex; flex-direction: column; gap: 2px; }
-    .zoom-btns button { font-family: var(--ffM); font-size: 1rem; line-height: 1; width: 28px; height: 28px; border: 1px solid var(--amberD); background: rgba(8,10,15,0.88); color: var(--amber); cursor: pointer; display: flex; align-items: center; justify-content: center; transition: background 0.15s; }
-    .zoom-btns button:hover { background: var(--amber); color: var(--bg); }
-    .zoom-level { font-family: var(--ffM); font-size: 0.48rem; letter-spacing: 0.1em; text-transform: uppercase; color: var(--ink3); text-align: center; padding-top: 3px; }
-    .zoom-hint { position: absolute; bottom: 0.6rem; right: 1rem; z-index: 10; font-family: var(--ffM); font-size: 0.5rem; letter-spacing: 0.1em; text-transform: uppercase; color: var(--ink3); pointer-events: none; }
-    #scrolly-svg, #explore-svg { cursor: grab; overflow: hidden; }
-    #scrolly-svg:active, #explore-svg:active { cursor: grabbing; }
-    #sankey-zoom-area { display: flex; align-items: center; gap: 0.4rem; margin-left: auto; }
+    .zoom-btns { position: absolute; bottom: 2.8rem; right: 1rem; z-index: 10; display: flex; flex-direction: column; gap: 2px; }  /* +/- zoom button group: absolute in the bottom-right of the map pane */
+    .zoom-btns button { font-family: var(--ffM); font-size: 1rem; line-height: 1; width: 28px; height: 28px; border: 1px solid var(--amberD); background: rgba(8,10,15,0.88); color: var(--amber); cursor: pointer; display: flex; align-items: center; justify-content: center; transition: background 0.15s; }  /* Individual zoom button: square amber-bordered dark button */
+    .zoom-btns button:hover { background: var(--amber); color: var(--bg); }  /* Zoom button hover: fills amber */
+    .zoom-level { font-family: var(--ffM); font-size: 0.48rem; letter-spacing: 0.1em; text-transform: uppercase; color: var(--ink3); text-align: center; padding-top: 3px; }  /* Current zoom level readout below the zoom buttons (e.g. '2.4×') */
+    .zoom-hint { position: absolute; bottom: 0.6rem; right: 1rem; z-index: 10; font-family: var(--ffM); font-size: 0.5rem; letter-spacing: 0.1em; text-transform: uppercase; color: var(--ink3); pointer-events: none; }  /* 'Drag · pinch to zoom' instruction text — tiny, non-interactive */
+    #scrolly-svg, #explore-svg { cursor: grab; overflow: hidden; }  /* Both interactive SVG maps show a grab cursor and clip overflowing content */
+    #scrolly-svg:active, #explore-svg:active { cursor: grabbing; }  /* While dragging either map, cursor changes to grabbing */
+    #sankey-zoom-area { display: flex; align-items: center; gap: 0.4rem; margin-left: auto; }  /* Stream zoom controls pushed to the far right of the sankey toolbar */
 
     /* CDB90 section — hidden until data confirms it loaded */
-    #cdb90-wrapper { display: none; }
-    #cdb90-section { margin: 0 8vw 0; border: 1px solid var(--border); background: var(--bg-card); }
-    #cdb90-header { padding: 1.8rem 2rem 1.2rem; border-bottom: 1px solid var(--borderF); display: grid; grid-template-columns: 1fr 1fr; gap: 2rem; align-items: start; }
-    .cdb90-label { font-family: var(--ffM); font-size: 0.6rem; letter-spacing: 0.28em; text-transform: uppercase; color: var(--amber); margin-bottom: 0.5rem; }
-    .cdb90-heading { font-family: var(--ffD); font-size: clamp(1.4rem, 2.5vw, 2rem); color: var(--ink); line-height: 1.1; margin-bottom: 0.7rem; }
-    .cdb90-body { font-size: 0.9rem; color: var(--ink2); line-height: 1.72; }
-    .cdb90-body strong { color: var(--amber); font-weight: 700; }
-    .cdb90-stat-col { display: flex; flex-direction: column; gap: 1.2rem; padding-top: 0.4rem; }
-    .cdb90-stat { border-left: 2px solid var(--amberD); padding-left: 1rem; }
-    .cdb90-stat-n { font-family: var(--ffD); font-size: 1.9rem; color: var(--amber); line-height: 1; }
-    .cdb90-stat-l { font-family: var(--ffM); font-size: 0.56rem; letter-spacing: 0.14em; text-transform: uppercase; color: var(--ink2); margin-top: 0.2rem; }
-    #cdb90-filter { display: flex; align-items: center; flex-wrap: wrap; gap: 0.4rem; padding: 0.65rem 1.3rem; border-bottom: 1px solid var(--borderF); }
-    #cdb90-svg { width: 100%; display: block; cursor: grab; }
-    #cdb90-svg:active { cursor: grabbing; }
-    #cdb90-footer { font-family: var(--ffM); font-size: 0.55rem; letter-spacing: 0.1em; text-transform: uppercase; color: var(--ink3); text-align: right; padding: 0.3rem 1rem 0.5rem; }
-    .cdb90-bar-wrap { padding: 0.8rem 2rem 1.2rem; border-top: 1px solid var(--borderF); }
-    .cdb90-bar-label { font-family: var(--ffM); font-size: 0.58rem; letter-spacing: 0.14em; text-transform: uppercase; color: var(--ink2); margin-bottom: 0.6rem; }
-    .cdb90-bar-row { display: flex; align-items: center; gap: 0.6rem; margin-bottom: 0.35rem; }
-    .cdb90-bar-name { font-family: var(--ffM); font-size: 0.6rem; letter-spacing: 0.06em; color: var(--ink2); width: 9rem; flex-shrink: 0; text-align: right; }
-    .cdb90-bar-track { flex: 1; height: 6px; background: var(--ink3); border-radius: 2px; overflow: hidden; }
-    .cdb90-bar-fill { height: 100%; border-radius: 2px; transition: width 0.6s ease; }
-    .cdb90-bar-pct { font-family: var(--ffM); font-size: 0.6rem; color: var(--ink2); width: 3rem; flex-shrink: 0; }
+    #cdb90-wrapper { display: none; }  /* CDB90 section is hidden by default; JS shows it only if the CDB90 CSV files load successfully */
+    #cdb90-section { margin: 0 8vw 0; border: 1px solid var(--border); background: var(--bg-card); }  /* CDB90 main card: matches the explorer map card styling */
+    #cdb90-header { padding: 1.8rem 2rem 1.2rem; border-bottom: 1px solid var(--borderF); display: grid; grid-template-columns: 1fr 1fr; gap: 2rem; align-items: start; }  /* CDB90 header: two-column grid (description left, stats right) */
+    .cdb90-label { font-family: var(--ffM); font-size: 0.6rem; letter-spacing: 0.28em; text-transform: uppercase; color: var(--amber); margin-bottom: 0.5rem; }  /* CDB90 eyebrow label — same style as chapter tags */
+    .cdb90-heading { font-family: var(--ffD); font-size: clamp(1.4rem, 2.5vw, 2rem); color: var(--ink); line-height: 1.1; margin-bottom: 0.7rem; }  /* CDB90 section heading: fluid size, display serif */
+    .cdb90-body { font-size: 0.9rem; color: var(--ink2); line-height: 1.72; }  /* CDB90 descriptive body text */
+    .cdb90-body strong { color: var(--amber); font-weight: 700; }  /* Bold within CDB90 body renders amber for emphasis */
+    .cdb90-stat-col { display: flex; flex-direction: column; gap: 1.2rem; padding-top: 0.4rem; }  /* Right column of the CDB90 header: vertical stack of stats */
+    .cdb90-stat { border-left: 2px solid var(--amberD); padding-left: 1rem; }  /* CDB90 individual stat — same pattern as hero stats */
+    .cdb90-stat-n { font-family: var(--ffD); font-size: 1.9rem; color: var(--amber); line-height: 1; }  /* Large number in a CDB90 stat */
+    .cdb90-stat-l { font-family: var(--ffM); font-size: 0.56rem; letter-spacing: 0.14em; text-transform: uppercase; color: var(--ink2); margin-top: 0.2rem; }  /* Label under a CDB90 stat number */
+    #cdb90-filter { display: flex; align-items: center; flex-wrap: wrap; gap: 0.4rem; padding: 0.65rem 1.3rem; border-bottom: 1px solid var(--borderF); }  /* CDB90 era filter chip row — mirrors the explore-map region filter row */
+    #cdb90-svg { width: 100%; display: block; cursor: grab; }  /* CDB90 map SVG — full-width, pannable */
+    #cdb90-svg:active { cursor: grabbing; }  /* CDB90 map shows grabbing cursor while dragging */
+    #cdb90-footer { font-family: var(--ffM); font-size: 0.55rem; letter-spacing: 0.1em; text-transform: uppercase; color: var(--ink3); text-align: right; padding: 0.3rem 1rem 0.5rem; }  /* Source attribution footnote below the CDB90 map */
+    .cdb90-bar-wrap { padding: 0.8rem 2rem 1.2rem; border-top: 1px solid var(--borderF); }  /* CDB90 regional bar chart wrapper below the map */
+    .cdb90-bar-label { font-family: var(--ffM); font-size: 0.58rem; letter-spacing: 0.14em; text-transform: uppercase; color: var(--ink2); margin-bottom: 0.6rem; }  /* Label above the CDB90 bar chart */
+    .cdb90-bar-row { display: flex; align-items: center; gap: 0.6rem; margin-bottom: 0.35rem; }  /* One region row in the CDB90 bar chart: name + track + percentage */
+    .cdb90-bar-name { font-family: var(--ffM); font-size: 0.6rem; letter-spacing: 0.06em; color: var(--ink2); width: 9rem; flex-shrink: 0; text-align: right; }  /* Region name label fixed to 9rem, right-aligned so all tracks start at the same x position */
+    .cdb90-bar-track { flex: 1; height: 6px; background: var(--ink3); border-radius: 2px; overflow: hidden; }  /* Bar chart track (background rail) — dark gray, rounded */
+    .cdb90-bar-fill { height: 100%; border-radius: 2px; transition: width 0.6s ease; }  /* Bar chart fill — colored by region, width set inline, animates in */
+    .cdb90-bar-pct { font-family: var(--ffM); font-size: 0.6rem; color: var(--ink2); width: 3rem; flex-shrink: 0; }  /* Percentage + count label to the right of each bar */
 
     /* Footer */
-    footer { border-top: 1px solid var(--border); padding: 1.6rem 8vw; display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 0.5rem; }
-    footer p { font-family: var(--ffM); font-size: 0.58rem; letter-spacing: 0.14em; text-transform: uppercase; color: var(--ink3); }
-    footer a { color: var(--amber); text-decoration: none; }
+    footer { border-top: 1px solid var(--border); padding: 1.6rem 8vw; display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 0.5rem; }  /* Page footer: amber top border, two items spread across with wrapping */
+    footer p { font-family: var(--ffM); font-size: 0.58rem; letter-spacing: 0.14em; text-transform: uppercase; color: var(--ink3); }  /* Footer paragraph text: tiny monospace uppercase, muted color */
+    footer a { color: var(--amber); text-decoration: none; }  /* Footer links: amber with no underline */
 
-    @media (max-width: 860px) {
-      #cdb90-header { grid-template-columns: 1fr; }
-      #hero { grid-template-columns: 1fr; }
-      #hero-map { display: none; }
-      #scrolly { flex-direction: column; }
-      #sticky-pane { position: relative; height: 55vw; min-height: 260px; width: 100%; }
-      #steps-pane  { width: 100%; padding: 0 5vw; }
-      #charts-docgap, #charts-rhythm { grid-template-columns: 1fr; }
-      .chart-box.wide { grid-column: span 1; }
+    @media (max-width: 860px) {  /* Responsive breakpoint: apply mobile layout when viewport is 860px or narrower */
+      #cdb90-header { grid-template-columns: 1fr; }  /* Mobile: CDB90 header stacks to single column */
+      #hero { grid-template-columns: 1fr; }  /* Mobile: hero section stacks to single column */
+      #hero-map { display: none; }  /* Mobile: hide the decorative hero map entirely to save space */
+      #scrolly { flex-direction: column; }  /* Mobile: stack scrolly panels vertically */
+      #sticky-pane { position: relative; height: 55vw; min-height: 260px; width: 100%; }  /* Mobile: sticky map panel is no longer sticky; takes proportional viewport height */
+      #steps-pane  { width: 100%; padding: 0 5vw; }  /* Mobile: steps pane goes full-width */
+      #charts-docgap, #charts-rhythm { grid-template-columns: 1fr; }  /* Mobile: chart grids collapse to single column */
+      .chart-box.wide { grid-column: span 1; }  /* Mobile: wide chart cards no longer span two columns */
     }
   </style>
 </head>
 <body>
 
+<!-- Full-screen loading overlay shown while CSVs and the world TopoJSON are fetched -->
 <div id="loading">
+  <!-- Loading title text ('Loading Battle Records') -->
   <div id="l-title">Loading Battle Records</div>
+  <!-- Dynamic status message updated by setProgress() (e.g. 'Fetching world map…') -->
   <div id="l-msg">Initializing…</div>
+  <!-- Progress bar: track (outer) and fill (inner) animated by setProgress() -->
   <div id="l-track"><div id="l-fill"></div></div>
 </div>
 
 <!-- HERO -->
+<!-- ═══ HERO SECTION ═══ Full-viewport-height intro with title text and decorative world map -->
 <section id="hero">
+  <!-- Left panel: title, lede, and key stats -->
   <div id="hero-text">
+    <!-- Small uppercase eyebrow label above the main title -->
     <div class="overline">An Explorable Visualization</div>
+    <!-- Main h1 with 'Cartography' in italic amber and a line break -->
     <h1>The <em>Cartography</em><br>of Conflict</h1>
+    <!-- Lead sentence summarising what the visualization shows -->
     <p class="lede">More than 2 millennia of battle — where humanity has fought, whose wars were written down, and what the record reveals about history and its silences.</p>
+    <!-- Three-stat grid showing total battles, years of history, and distinct wars -->
     <div class="hero-stats">
+      <!-- Unique Battles stat — filled by JS from the loaded dataset -->
       <div class="stat"><div class="stat-n" id="s-battles">—</div><div class="stat-l">Unique Battles</div></div>
+      <!-- Years of History stat — filled by JS -->
       <div class="stat"><div class="stat-n" id="s-years">—</div><div class="stat-l">Years of History</div></div>
+      <!-- Distinct Conflicts stat — filled by JS -->
       <div class="stat"><div class="stat-n" id="s-wars">—</div><div class="stat-l">Distinct Conflicts</div></div>
     </div>
   </div>
+  <!-- Right panel: decorative hero Mercator map -->
   <div id="hero-map">
+    <!-- SVG element for the hero map — drawn by buildHeroMap() -->
     <svg id="hero-svg"></svg>
+    <!-- 'Scroll to explore' hint: animated drip bar + label shown at the bottom of the hero -->
     <div class="scroll-hint"><div class="scroll-bar"></div><span>Scroll to explore</span></div>
   </div>
 </section>
 
 <!-- CHAPTER I -->
+<!-- ═══ CHAPTER I HEADER ═══ -->
 <div class="ch-head">
+  <!-- Chapter tag label ('Chapter I') -->
   <div class="ch-tag">Chapter I</div>
+  <!-- Chapter title -->
   <div class="ch-title">The Geographic Shift of War</div>
+  <!-- Chapter subtitle / description -->
   <p class="ch-desc">The amber circle marks the weighted centroid of documented conflict. Its drift cannot be attributed to a single factor but is a combination of real historical trends, editorial silence, and the expanding reach of literacy, all at once.</p>
 </div>
 
+<!-- ═══ SCROLLYTELLING SECTION ═══ Sticky map pane (left) + narrative steps pane (right) -->
 <section id="scrolly">
+  <!-- Left sticky pane: contains the era legend, the scrolly SVG, zoom buttons, and centroid info -->
   <div id="sticky-pane">
+    <!-- Era color legend populated by buildLegend() -->
     <div class="era-legend" id="era-legend"></div>
+    <!-- Flex wrapper that allows the SVG to grow and the zoom buttons to overlay it -->
     <div style="flex:1;min-height:0;position:relative;">
+      <!-- Sticky map SVG — drawn by buildScrollyMap() -->
       <svg id="scrolly-svg" style="width:100%;height:100%;display:block;"></svg>
+      <!-- Zoom control buttons for the scrolly map -->
       <div class="zoom-btns" id="scrolly-zoom-btns">
+        <!-- Zoom-in (+) button -->
         <button id="sz-in" title="Zoom in">+</button>
+        <!-- Zoom-out (−) button -->
         <button id="sz-out" title="Zoom out">−</button>
+        <!-- Reset zoom (⌂) button -->
         <button id="sz-rst" style="font-size:0.65rem;" title="Reset zoom">⌂</button>
+        <!-- Current zoom level label (e.g. '2.4×') -->
         <div class="zoom-level" id="sz-level">1×</div>
+      <!-- Instruction text: 'Drag · pinch to zoom' -->
       </div>
       <div class="zoom-hint">Drag · pinch to zoom</div>
+    <!-- Large era watermark label below the map (e.g. 'Ancient') — updated by setEra() -->
     </div>
+    <!-- Centroid coordinate readout below the badge — updated by setEra() -->
     <div id="year-badge">—</div>
     <div id="centroid-info">—</div>
   </div>
 
   <div id="steps-pane">
+    <!-- Step 1: Ancient era (before 500 AD) -->
     <div class="step" data-era="ancient">
+      <!-- Step card: semi-transparent, slides in when active -->
       <div class="step-card">
+        <!-- Step number / date range label -->
         <div class="step-num">01 — Before 500 AD</div>
+        <!-- Step title -->
         <div class="step-title">The Ancient World</div>
+        <!-- Step narrative body with bolded geographic highlights -->
         <div class="step-body">Conflict in the ancient world was centered on the <strong>Mediterranean basin and Mesopotamia</strong> — the cradle of literate civilization. Persian, Greek, Roman, and Chinese sources preserve battle records, but vast regions of Africa, the Americas, and much of Asia go undocumented.
+          <!-- Callout showing the computed centroid for this era — filled by JS -->
           <div class="centroid-callout">Centroid: <span id="cc-ancient">computing…</span></div>
         </div>
       </div>
     </div>
+    <!-- Step 2: Medieval era (500–1399) -->
     <div class="step" data-era="medieval">
       <div class="step-card">
         <div class="step-num">02 — 500 to 1399</div>
@@ -300,6 +340,7 @@
         </div>
       </div>
     </div>
+    <!-- Step 3: Early Modern / Gunpowder era (1400–1699) -->
     <div class="step" data-era="earlymod">
       <div class="step-card">
         <div class="step-num">03 — 1400 to 1699</div>
@@ -309,6 +350,7 @@
         </div>
       </div>
     </div>
+    <!-- Step 4: Colonial era (1700–1899) -->
     <div class="step" data-era="colonial">
       <div class="step-card">
         <div class="step-num">04 — 1700 to 1899</div>
@@ -318,6 +360,7 @@
         </div>
       </div>
     </div>
+    <!-- Step 5: World Wars era (1900–1945) -->
     <div class="step" data-era="modern">
       <div class="step-card">
         <div class="step-num">05 — 1900 to 1945</div>
@@ -327,6 +370,7 @@
         </div>
       </div>
     </div>
+    <!-- Step 6: Contemporary era (1946–present) -->
     <div class="step" data-era="contemp">
       <div class="step-card">
         <div class="step-num">06 — 1946 to Present</div>
@@ -346,53 +390,88 @@
   <p class="ch-desc">The map of battles is really a map of whose wars get written down. The blank spaces are not peace — they are silence. Every dot links to Wikipedia, or searches for the battle if no article exists.</p>
 </div>
 
+<!-- ═══ EXPLORE MAP SECTION ═══ Full interactive map with playback and region filters -->
 <section style="padding-bottom:2rem;">
+  <!-- Explore map card wrapper -->
   <div id="explore-wrap">
+    <!-- Playback toolbar: Play, Speed, Reset, Year slider, Zoom controls -->
     <div id="toolbar">
+      <!-- Play/Pause button — toggled by JS -->
       <button class="btn" id="play-btn">▶ Play</button>
+      <!-- Speed toggle: switches between normal and fast playback -->
       <button class="btn btn-g" id="speed-btn" title="Toggle playback speed">▶▶ Fast</button>
+      <!-- Reset button: returns year to 500 BC -->
       <button class="btn btn-g" id="reset-btn">↺ Reset</button>
+      <!-- Slider wrapper: year range slider + viewport -->
       <div id="slider-wrap">
+        <!-- Year range slider from 500 BC (–500) to 2026 -->
         <input type="range" id="yr-slider" min="-500" max="2026" value="-500" step="1" />
       </div>
+      <!-- Year display label (e.g. '500 BC') updated by render() -->
       <div id="yr-label">500 BC</div>
+      <!-- Visual divider between playback and zoom controls -->
       <div style="width:1px;height:22px;background:var(--ink3);flex-shrink:0;"></div>
+      <!-- Zoom-in button for the explore map -->
       <button class="btn btn-g" id="ez-in"  style="padding:0.38rem 0.65rem;" title="Zoom in">+</button>
+      <!-- Zoom-out button for the explore map -->
       <button class="btn btn-g" id="ez-out" style="padding:0.38rem 0.65rem;" title="Zoom out">−</button>
+      <!-- Reset zoom button for the explore map -->
       <button class="btn btn-g" id="ez-rst" style="padding:0.38rem 0.65rem;font-size:0.6rem;" title="Reset zoom">⌂ Reset</button>
+      <!-- Current zoom level readout (e.g. '1×') -->
       <span id="ez-level" style="font-family:var(--ffM);font-size:0.58rem;color:var(--ink3);letter-spacing:0.1em;">1×</span>
     </div>
+    <!-- Region filter chip row -->
     <div id="filter-row">
+      <!-- 'Region:' label -->
       <span class="flabel">Region:</span>
+      <!-- 'All' filter chip (active by default) -->
       <button class="chip on" data-f="all">All</button>
+      <!-- Europe region filter chip -->
       <button class="chip" data-f="europe">Europe</button>
+      <!-- Middle East & N.Africa filter chip -->
       <button class="chip" data-f="mena">Middle East</button>
+      <!-- Sub-Saharan Africa filter chip -->
       <button class="chip" data-f="ssafrica">Africa</button>
+      <!-- Asia filter chip -->
       <button class="chip" data-f="asia">Asia</button>
+      <!-- Americas filter chip -->
       <button class="chip" data-f="americas">Americas</button>
+      <!-- Battle count tally: 'Showing N battles' pushed to the right -->
       <span id="tally">Showing <span id="tally-n">0</span> battles</span>
     </div>
+    <!-- Map SVG wrapper with overflow:hidden so dots don't bleed outside the card -->
     <div style="position:relative;overflow:hidden;">
+      <!-- Explore map SVG — drawn by buildExploreMap() -->
       <svg id="explore-svg" viewBox="0 0 960 500"></svg>
     </div>
+    <!-- Map footnote explaining dot interactivity and Wikipedia links -->
     <div class="map-note">Battles with recorded coordinates · hover for detail · every dot links to Wikipedia (direct article or search)</div>
   </div>
 </section>
 
 <!-- Doc gap charts -->
+<!-- Left chart card: battles by region (raw count) -->
 <div id="charts-docgap">
+  <!-- Insight stat: Europe's percentage of all documented battles -->
   <div class="chart-box">
     <div class="insight">
+      <!-- Insight text explaining Europe's outsized share -->
       <div class="insight-num" id="europe-pct">—</div>
       <div class="insight-txt"><strong>Europe's outsized share.</strong> Despite covering only ~7% of Earth's land surface, Europe accounts for a disproportionate share of all documented battles — a direct reflection of whose historians survived.</div>
     </div>
+    <!-- Chart title -->
     <div class="chart-title">Battles by World Region — Raw Count</div>
+    <!-- Chart subtitle -->
     <div class="chart-sub">All battles with parseable coordinates</div>
+    <!-- SVG for the raw-count bar chart -->
     <svg id="c-region-raw" class="chart-svg" viewBox="0 0 400 280"></svg>
   </div>
+  <!-- Right chart card: battles per million km² (normalized by area) -->
   <div class="chart-box">
+    <!-- Insight stat: how many times more dense Europe is than Africa -->
     <div class="insight">
       <div class="insight-num" id="africa-deficit">—</div>
+      <!-- Insight text explaining Africa's documentation deficit -->
       <div class="insight-txt"><strong>Africa's documentation deficit.</strong> Normalized by land area, Sub-Saharan Africa has the lowest battle density of any inhabited continent — not because it was peaceful, but because its conflicts were rarely recorded.</div>
     </div>
     <div class="chart-title">Battles per Million km² of Land</div>
@@ -402,37 +481,53 @@
 </div>
 
 <!-- CDB90 section — hidden by default; revealed by JS if data/battles.csv loads -->
+<!-- Outer wrapper hidden in CSS; shown by buildCDB90Map() -->
 <div id="cdb90-wrapper">
+  <!-- Section intro: context paragraph above the CDB90 card -->
   <div style="padding: 2.5rem 8vw 0; border-top: 1px solid var(--borderF); margin-top: 1rem;">
+    <!-- Eyebrow label -->
     <div class="cdb90-label">A Deeper Bias</div>
+    <!-- Intro heading -->
     <div style="font-family:var(--ffD);font-size:clamp(1.6rem,3vw,2.6rem);color:var(--ink);line-height:1.05;margin-bottom:0.8rem;">Even the "Gold Standard" is European</div>
+    <!-- Intro paragraph explaining what CDB90 is and why it matters -->
     <p style="font-size:1rem;font-style:italic;color:var(--ink2);max-width:72ch;margin-bottom:0;">
       The <strong style="color:var(--amber)">CDB90</strong> (U.S. Army Concepts Analysis Agency, 1984) is the most thoroughly coded land-battle database ever assembled — 660 battles, four centuries, tactical data for every engagement. Plot its battles on a world map, and the problem is immediately visible: roughly <strong style="color:var(--amber)">66% fall in Europe or on European colonial frontiers</strong>. Not a failure of its compilers — a structural truth about which military records survive in forms usable by Western researchers.
     </p>
   </div>
 
+  <!-- CDB90 main card -->
   <div id="cdb90-section" style="margin-top:1.5rem;">
+    <!-- CDB90 card header: description (left) and stats (right) -->
     <div id="cdb90-header">
+      <!-- Left description column -->
       <div>
+        <!-- Card eyebrow label with dataset metadata -->
         <div class="cdb90-label">CDB90 · 660 Battles · 1600–1973</div>
+        <!-- Card heading -->
         <div class="cdb90-heading">The World's Most Detailed Battle Database Has Almost No Data on Most of the World</div>
+        <!-- Card body: explains the European bias in CDB90 -->
         <div class="cdb90-body">
           Of 660 battles in CDB90, <strong>~82% are fought in Europe or on European colonial frontiers</strong>. Sub-Saharan Africa — which experienced constant conflict throughout this period — contributes fewer than 10 battles. Every attacker win-rate and tactical lesson drawn from CDB90 is primarily a lesson about how <em>European-tradition armies</em> fight. Hover each dot to see the battle; use the era filter to watch the geographic story unfold.
         </div>
       </div>
+      <!-- Right stats column -->
       <div class="cdb90-stat-col">
+        <!-- Total battles stat -->
         <div class="cdb90-stat">
           <div class="cdb90-stat-n">660</div>
           <div class="cdb90-stat-l">Total battles in CDB90</div>
         </div>
+        <!-- Europe percentage stat (filled by JS) -->
         <div class="cdb90-stat">
           <div class="cdb90-stat-n" id="cdb90-europe-pct">~82%</div>
           <div class="cdb90-stat-l">Europe or European colonial frontiers</div>
         </div>
+        <!-- Years covered stat -->
         <div class="cdb90-stat">
           <div class="cdb90-stat-n">373</div>
           <div class="cdb90-stat-l">Years covered (1600–1973)</div>
         </div>
+        <!-- Sub-Saharan Africa battles stat -->
         <div class="cdb90-stat">
           <div class="cdb90-stat-n">&lt;10</div>
           <div class="cdb90-stat-l">Battles in sub-Saharan Africa</div>
@@ -440,30 +535,47 @@
       </div>
     </div>
 
+    <!-- Era filter chip row for the CDB90 map -->
     <div id="cdb90-filter">
+      <!-- 'Filter by era:' label -->
       <span class="flabel">Filter by era:</span>
+      <!-- 'All' era chip (active by default) -->
       <button class="chip on" data-cera="all">All</button>
+      <!-- 1600s chip -->
       <button class="chip" data-cera="early">1600s</button>
+      <!-- 1700–1789 chip -->
       <button class="chip" data-cera="c18">1700–1789</button>
+      <!-- Napoleonic chip -->
       <button class="chip" data-cera="napoleon">Napoleonic</button>
+      <!-- Industrial chip -->
       <button class="chip" data-cera="industrial">Industrial</button>
+      <!-- WWI chip -->
       <button class="chip" data-cera="ww1">WWI</button>
+      <!-- WWII chip -->
       <button class="chip" data-cera="ww2">WWII</button>
+      <!-- Cold War chip -->
       <button class="chip" data-cera="coldwar">Cold War</button>
+      <!-- 'Showing N battles' tally for CDB90 -->
       <span id="cdb90-tally" style="margin-left:auto;font-family:var(--ffM);font-size:0.58rem;letter-spacing:0.12em;text-transform:uppercase;color:var(--ink2);">
         Showing <span id="cdb90-tally-n" style="color:var(--amber);">660</span> battles
       </span>
     </div>
 
+    <!-- CDB90 map SVG wrapper -->
     <div style="position:relative;overflow:hidden;">
+      <!-- CDB90 map SVG — drawn by buildCDB90Map() -->
       <svg id="cdb90-svg" viewBox="0 0 960 480"></svg>
     </div>
 
+    <!-- Regional bar chart below the CDB90 map -->
     <div class="cdb90-bar-wrap">
+      <!-- Bar chart section label -->
       <div class="cdb90-bar-label">CDB90 battles by region — share of total dataset</div>
+      <!-- Bar chart rows container — populated by buildCDB90Map() -->
       <div id="cdb90-bars"></div>
     </div>
 
+    <!-- Source attribution footnote -->
     <div id="cdb90-footer">
       Source: CDB90 (jrnold/CDB90 v9.0.3) — U.S. Army Concepts Analysis Agency, 1984 · 660 land battles · dots positioned at recorded region centroids
     </div>
@@ -477,20 +589,33 @@
   <p class="ch-desc">When does humanity fight? The steep rise in modern centuries reflects both more conflict and far more complete records — the two are impossible to fully disentangle.</p>
 </div>
 
+<!-- ═══ RHYTHM CHARTS SECTION ═══ Stacked histogram + duration + top wars -->
 <div id="charts-rhythm">
+  <!-- Wide chart card (spans both columns) for the stacked area histogram -->
   <div class="chart-box wide">
+    <!-- Chart title -->
     <div class="chart-title">Battle Frequency Over Time — Stacked by Region</div>
+    <!-- Chart subtitle -->
     <div class="chart-sub">All battles with valid dates · 25-year bins · 500 BC – 2026 AD</div>
+    <!-- SVG for the stacked area rhythm chart -->
     <svg id="c-rhythm" class="chart-svg" viewBox="0 0 900 320"></svg>
   </div>
+  <!-- Battle duration distribution chart card -->
   <div class="chart-box">
+    <!-- Chart title -->
     <div class="chart-title">Battle Duration Distribution</div>
+    <!-- Chart subtitle -->
     <div class="chart-sub">Battles with recorded start and end dates (n ≈ 4,500) · log scale</div>
+    <!-- SVG for the duration histogram -->
     <svg id="c-dur" class="chart-svg" viewBox="0 0 400 240"></svg>
   </div>
+  <!-- Top 15 wars chart card -->
   <div class="chart-box">
+    <!-- Chart title -->
     <div class="chart-title">Most Battle-Intensive Conflicts</div>
+    <!-- Chart subtitle -->
     <div class="chart-sub">Top 15 wars by number of documented engagements</div>
+    <!-- SVG for the top-wars bar chart -->
     <svg id="c-wars" class="chart-svg" viewBox="0 0 400 340"></svg>
   </div>
 </div>
@@ -502,39 +627,59 @@
   <p class="ch-desc">Each ribbon is a major conflict; its height at any point equals battles per decade. Scroll to zoom into a time period, drag to pan. <strong style="color:var(--amber)">Click any ribbon or legend entry</strong> to drill into that war's individual battle timeline.</p>
 </div>
 
+<!-- ═══ STREAM DIAGRAM SECTION ═══ Zoomable stream chart + war detail panel -->
 <div id="sankey-outer">
+  <!-- Stream toolbar: description label, instruction hint, zoom controls -->
   <div id="sankey-toolbar">
+    <!-- Left-hand description label -->
     <span style="font-family:var(--ffM);font-size:0.6rem;letter-spacing:0.14em;text-transform:uppercase;color:var(--ink2);">
       Top conflicts by documented battle count · 1000 AD – 2026
     </span>
+    <!-- Instruction hint explaining interaction -->
     <span style="font-family:var(--ffM);font-size:0.58rem;color:var(--ink3);">
       Hover to isolate · <strong style="color:var(--amber)">click to expand</strong> · height = battles per decade
     </span>
+    <!-- Zoom button group pushed to the far right of the toolbar -->
     <div id="sankey-zoom-area">
+      <!-- Zoom-in button -->
       <button class="btn btn-g" id="sk-in"  style="padding:0.32rem 0.6rem;" title="Zoom in">+</button>
+      <!-- Zoom-out button -->
       <button class="btn btn-g" id="sk-out" style="padding:0.32rem 0.6rem;" title="Zoom out">−</button>
+      <!-- Reset zoom button -->
       <button class="btn btn-g" id="sk-rst" style="padding:0.32rem 0.6rem;font-size:0.6rem;" title="Reset zoom">⌂</button>
+      <!-- Current zoom level readout -->
       <span id="sk-level" style="font-family:var(--ffM);font-size:0.58rem;color:var(--ink3);letter-spacing:0.1em;">1×</span>
     </div>
   </div>
 
+  <!-- Stream diagram SVG — drawn by buildSankeyStream() -->
   <svg id="sankey-svg" viewBox="0 0 960 420"></svg>
 
+  <!-- War detail panel: overlays the stream diagram when a war ribbon is clicked -->
   <div id="war-detail">
+    <!-- Panel header: back button + war name -->
     <div id="war-detail-header">
+      <!-- Back button returns to the stream view -->
       <button id="back-btn">← Back to Stream</button>
+      <!-- War name title filled by showWarDetail() -->
       <div id="war-detail-title">—</div>
     </div>
+    <!-- War timeline SVG — drawn by showWarDetail() -->
     <svg id="war-detail-svg" viewBox="0 0 960 340"></svg>
   </div>
 
+  <!-- War legend below the stream diagram — populated by buildSankeyStream() -->
   <div class="sankey-legend" id="sankey-legend"></div>
 </div>
 
+<!-- Global tooltip element reused by all interactive charts and maps -->
 <div id="tip"></div>
 
+<!-- ═══ FOOTER ═══ -->
 <footer>
+  <!-- Left footer: data sources and attribution links -->
   <p>Data: <a href="https://www.wikidata.org" target="_blank">Wikidata</a> SPARQL export — 22,000+ battles, 3000 BC – 2026 · <a href="https://github.com/jrnold/CDB90" target="_blank">CDB90</a> loaded as optional comparison where available</p>
+  <!-- Right footer: course credit -->
   <p>CSE 442 Data Visualization · University of Washington</p>
 </footer>
 
@@ -578,7 +723,7 @@
 /* ══ DATA PATHS ══════════════════════════════════════════
    All CSV files must be served from data/ in same parent folder as index.html
 ════════════════════════════════════════════════════════ */
-const P = { battles: 'data/battles_wiki.csv' };
+const P = { battles: 'data/battles_wiki.csv' };  // P object: centralizes data file paths so they're easy to update in one place
 
 /* ══ ERA & REGION DEFINITIONS ════════════════════════════
    ERAS divide history into 6 broad periods for colour-coding
@@ -595,23 +740,23 @@ const P = { battles: 'data/battles_wiki.csv' };
               battle counts in the "per M km²" chart
      key:'other' — battles with missing or unclassifiable coords
 ════════════════════════════════════════════════════════ */
-const ERAS = [
-  { key:'ancient',  label:'Ancient',      color:'#8a6a30', min:-3000, max:499  },
-  { key:'medieval', label:'Medieval',     color:'#4a7a5a', min:500,   max:1399 },
-  { key:'earlymod', label:'Early Modern', color:'#c8973a', min:1400,  max:1699 },
-  { key:'colonial', label:'Colonial',     color:'#7a5a9a', min:1700,  max:1899 },
-  { key:'modern',   label:'WWI–WWII',     color:'#9b2335', min:1900,  max:1945 },
-  { key:'contemp',  label:'Contemporary', color:'#4e7fa8', min:1946,  max:2030 },
+const ERAS = [  // ERAS array: defines the six historical periods — each has a key, label, year range, and dot color
+  { key:'ancient',  label:'Ancient',      color:'#8a6a30', min:-3000, max:499  },  // Ancient era: covers 3000 BC to 499 AD in a muted gold color
+  { key:'medieval', label:'Medieval',     color:'#4a7a5a', min:500,   max:1399 },  // Medieval era: 500 to 1399 AD in muted green
+  { key:'earlymod', label:'Early Modern', color:'#c8973a', min:1400,  max:1699 },  // Early Modern era: 1400 to 1699 AD in the primary amber accent
+  { key:'colonial', label:'Colonial',     color:'#7a5a9a', min:1700,  max:1899 },  // Colonial era: 1700 to 1899 AD in muted purple
+  { key:'modern',   label:'WWI–WWII',     color:'#9b2335', min:1900,  max:1945 },  // Modern (WWI-WWII) era: 1900 to 1945 in crimson
+  { key:'contemp',  label:'Contemporary', color:'#4e7fa8', min:1946,  max:2030 },  // Contemporary era: 1946 to 2030 in steel blue
 ];
-function eraFor(y) { return ERAS.find(e => y >= e.min && y <= e.max) || ERAS[0]; }
+function eraFor(y) { return ERAS.find(e => y >= e.min && y <= e.max) || ERAS[0]; }  // eraFor(y): finds the era object whose year range contains y; defaults to Ancient if none match
 
-const REGIONS = [
-  { key:'europe',   label:'Europe',                 color:'#9b2335', area:10.53 },
-  { key:'mena',     label:'Middle East & N.Africa', color:'#c8973a', area:11.00 },
-  { key:'ssafrica', label:'Sub-Saharan Africa',     color:'#5a8a5a', area:24.30 },
-  { key:'asia',     label:'Asia',                   color:'#4e7fa8', area:31.80 },
-  { key:'americas', label:'Americas',               color:'#7a5a9a', area:42.55 },
-  { key:'other',    label:'Other/Unknown',          color:'#3a3530', area:10.00 },
+const REGIONS = [  // REGIONS array: geographic zones used to color-code battles and compute documentation density stats
+  { key:'europe',   label:'Europe',                 color:'#9b2335', area:10.53 },  // Europe region: smallest area (10.53 M km²) but most documented — assigned crimson
+  { key:'mena',     label:'Middle East & N.Africa', color:'#c8973a', area:11.00 },  // Middle East & North Africa: covers 11 M km², amber-colored
+  { key:'ssafrica', label:'Sub-Saharan Africa',     color:'#5a8a5a', area:24.30 },  // Sub-Saharan Africa: vast area (24.3 M km²), severely under-documented
+  { key:'asia',     label:'Asia',                   color:'#4e7fa8', area:31.80 },  // Asia: largest of the coded regions at 31.8 M km²
+  { key:'americas', label:'Americas',               color:'#7a5a9a', area:42.55 },  // Americas: largest single region (42.55 M km²)
+  { key:'other',    label:'Other/Unknown',          color:'#3a3530', area:10.00 },  // Other/Unknown: catch-all for battles with unclassifiable or missing coordinates
 ];
 /* ══ REGION CLASSIFIER ═══════════════════════════════════
    regionKey(lat, lon) maps a coordinate to one of the REGIONS
@@ -624,15 +769,15 @@ const REGIONS = [
    then Europe (a narrow lat/lon window), then MENA, then ssAfrica,
    then Asia.  Anything that falls through returns 'other'.
 ════════════════════════════════════════════════════════ */
-function regionKey(lat, lon) {
-  if (lat == null || lon == null || isNaN(lat) || isNaN(lon)) return 'other';
-  if (lon < -30) return 'americas';
-  if (lat > 34 && lat < 75 && lon > -14 && lon < 45) return 'europe';
-  if (lat > 50 && lat < 75 && lon >= 45 && lon < 75) return 'europe';
-  if (lat >= 10 && lat <= 42 && lon >= -14 && lon <= 65) return 'mena';
-  if (lat >= -35 && lat < 15 && lon >= -20 && lon <= 55) return 'ssafrica';
-  if (lat >= -10 && lat <= 75 && lon >= 45 && lon <= 180) return 'asia';
-  return 'other';
+function regionKey(lat, lon) {  // regionKey(lat, lon): maps a coordinate pair to one of the five major region keys using bounding boxes
+  if (lat == null || lon == null || isNaN(lat) || isNaN(lon)) return 'other';  // Returns 'other' immediately if either coordinate is missing or not a number
+  if (lon < -30) return 'americas';  // Western Hemisphere: any longitude west of -30° is in the Americas
+  if (lat > 34 && lat < 75 && lon > -14 && lon < 45) return 'europe';  // Main European bounding box: mid-latitude band from Portugal to the Ural foothills
+  if (lat > 50 && lat < 75 && lon >= 45 && lon < 75) return 'europe';  // Northern European extension: covers Scandinavia and Finland east toward the Urals
+  if (lat >= 10 && lat <= 42 && lon >= -14 && lon <= 65) return 'mena';  // Middle East & North Africa: 10–42° N latitude band from Atlantic coast to the Gulf
+  if (lat >= -35 && lat < 15 && lon >= -20 && lon <= 55) return 'ssafrica';  // Sub-Saharan Africa: -35° to 15° N latitude, from the Atlantic to the Indian Ocean
+  if (lat >= -10 && lat <= 75 && lon >= 45 && lon <= 180) return 'asia';  // Asia: everything east of lon 45° and within habitable latitudes
+  return 'other';  // Falls through all boxes → 'other'
 }
 
 /* ══ UTILITIES ═══════════════════════════════════════════
@@ -652,34 +797,34 @@ function regionKey(lat, lon) {
      or "-0330-10-01" (negative years are BC in ISO 8601).
      Returns the integer year, or null if the string doesn't match.
 ════════════════════════════════════════════════════════ */
-function fmtN(n) {
-  if (n == null || isNaN(n)) return '—';
-  if (n >= 1e6) return (n/1e6).toFixed(1)+'M';
-  if (n >= 1000) return Math.round(n/1000)+'K';
-  return String(Math.round(n));
+function fmtN(n) {  // fmtN(n): formats large numbers compactly — 1.2M, 450K, or the raw integer
+  if (n == null || isNaN(n)) return '—';  // Returns an em-dash for null or NaN values
+  if (n >= 1e6) return (n/1e6).toFixed(1)+'M';  // ≥ 1 million: show one decimal followed by 'M'
+  if (n >= 1000) return Math.round(n/1000)+'K';  // ≥ 1 000: round to nearest thousand and append 'K'
+  return String(Math.round(n));  // < 1 000: return plain rounded integer string
 }
-function fmtYear(y) { if (y == null) return '—'; return y < 0 ? Math.abs(y)+' BC' : y+' AD'; }
-function truncate(s, n=28) { if (!s) return ''; return s.length > n ? s.slice(0, n-1)+'…' : s; }
-function setProgress(pct, msg) {
-  document.getElementById('l-fill').style.width = pct+'%';
-  document.getElementById('l-msg').textContent  = msg;
+function fmtYear(y) { if (y == null) return '—'; return y < 0 ? Math.abs(y)+' BC' : y+' AD'; }  // fmtYear(y): converts a numeric year to a display string — negative years become 'N BC', positive 'N AD'
+function truncate(s, n=28) { if (!s) return ''; return s.length > n ? s.slice(0, n-1)+'…' : s; }  // truncate(s, n): clips a string to n chars (default 28) and appends '…' to indicate truncation
+function setProgress(pct, msg) {  // setProgress(pct, msg): updates the loading bar width and status message text
+  document.getElementById('l-fill').style.width = pct+'%';  // Sets the CSS width of the amber fill bar to the given percentage
+  document.getElementById('l-msg').textContent  = msg;  // Sets the status text below the loading title
 }
-function parseCoord(s) {
-  if (!s) return null;
-  const m = s.match(/Point\(([-.0-9]+)\s+([-.0-9]+)\)/);
-  if (!m) return null;
-  const lon = parseFloat(m[1]), lat = parseFloat(m[2]);
-  if (isNaN(lon) || isNaN(lat) || lat < -90 || lat > 90 || lon < -180 || lon > 180) return null;
-  return { lon, lat };
+function parseCoord(s) {  // parseCoord(s): parses a Wikidata WKT 'Point(lon lat)' string into a {lon, lat} object
+  if (!s) return null;  // Returns null for falsy input (empty string, null, undefined)
+  const m = s.match(/Point\(([-.0-9]+)\s+([-.0-9]+)\)/);  // Regex captures two signed decimals in the WKT Point format
+  if (!m) return null;  // Returns null if the regex didn't match
+  const lon = parseFloat(m[1]), lat = parseFloat(m[2]);  // Parses the two capture groups as floats — note: WKT order is lon THEN lat
+  if (isNaN(lon) || isNaN(lat) || lat < -90 || lat > 90 || lon < -180 || lon > 180) return null;  // Validates that the parsed values are real numbers within legal geographic ranges
+  return { lon, lat };  // Returns the valid coordinate object
 }
-function parseYear(s) {
-  if (!s || typeof s !== 'string') return null;
-  if (!s.match(/^-?\d/)) return null;
-  const m = s.match(/^(-?\d+)-/);
-  if (!m) return null;
-  const y = parseInt(m[1], 10);
-  if (isNaN(y) || y > 2030 || y < -4000) return null;
-  return y;
+function parseYear(s) {  // parseYear(s): extracts the integer year from a Wikidata ISO-8601 date string like '1805-06-18' or '-0330-10-01'
+  if (!s || typeof s !== 'string') return null;  // Returns null for falsy or non-string inputs
+  if (!s.match(/^-?\d/)) return null;  // Rejects strings that don't start with an optional '-' followed by a digit
+  const m = s.match(/^(-?\d+)-/);  // Captures everything before the first '-' after the leading sign+digits — this gives the year part
+  if (!m) return null;  // Returns null if the regex didn't match (malformed date)
+  const y = parseInt(m[1], 10);  // Parses the captured year as base-10 integer
+  if (isNaN(y) || y > 2030 || y < -4000) return null;  // Guards against NaN and implausible year values (beyond the dataset's scope)
+  return y;  // Returns the valid integer year
 }
 
 /* ══ TOOLTIP ═════════════════════════════════════════════
@@ -695,52 +840,52 @@ function parseYear(s) {
    mouseleave handler to clear the timer and hide immediately
    when the cursor leaves the tooltip box.
 ════════════════════════════════════════════════════════ */
-const tip = document.getElementById('tip');
-let _tipTimer = null;      // grace-period timer handle
-const TIP_GRACE = 120;     // ms to wait before hiding (enough to move mouse across)
+const tip = document.getElementById('tip');  // tip: reference to the singleton tooltip DOM element reused across all maps
+let _tipTimer = null;      // grace-period timer handle  // _tipTimer: handle for the grace-period setTimeout so it can be cancelled on re-hover
+const TIP_GRACE = 120;     // ms to wait before hiding (enough to move mouse across)  // TIP_GRACE: 120 ms — long enough to move the mouse from a dot to the tooltip card
 
 /* The tooltip listens for mouseleave so that leaving the
    card hides it immediately (no stale tooltip floating). */
-tip.addEventListener('mouseleave', () => {
-  clearTimeout(_tipTimer);
-  tip.style.display = 'none';
+tip.addEventListener('mouseleave', () => {  // When the mouse leaves the tooltip card itself, cancel any pending timer and hide immediately
+  clearTimeout(_tipTimer);  // Immediately cancel the grace timer
+  tip.style.display = 'none';  // Hide the tooltip without waiting
 });
 
-function ttRow(k, v) {
-  if (v == null || v === '' || v === '—') return '';
-  return `<div class="tt-row"><span class="tt-k">${k}</span><span class="tt-v">${v}</span></div>`;
+function ttRow(k, v) {  // ttRow(k, v): returns an HTML string for one data row in the tooltip, or '' if the value is absent
+  if (v == null || v === '' || v === '—') return '';  // Skip empty/null/dash values to keep the tooltip compact
+  return `<div class="tt-row"><span class="tt-k">${k}</span><span class="tt-v">${v}</span></div>`;  // Returns a flex row with key on left, value on right
 }
 
-function showTip(ev, d) {
+function showTip(ev, d) {  // showTip(ev, d): populates and displays the tooltip for battle datum d at mouse event ev
   // Cancel any pending hide so the tooltip stays while hovering a new dot
   clearTimeout(_tipTimer);
 
   // Always give the user a place to go: direct article or search
-  const wikiUrl   = d.article || `https://en.wikipedia.org/wiki/Special:Search?search=${encodeURIComponent(d.name)}`;
+  const wikiUrl   = d.article || `https://en.wikipedia.org/wiki/Special:Search?search=${encodeURIComponent(d.name)}`;  // Label changes based on whether we have a direct article link
   const wikiLabel = d.article ? 'Read on Wikipedia →' : 'Search Wikipedia →';
 
-  tip.innerHTML = `
-    <div class="tt-name">${d.name}</div>
-    ${d.war ? `<div class="tt-war">${truncate(d.war, 45)}</div>` : ''}
-    ${ttRow('Year', fmtYear(d.year))}
-    ${ttRow('Location', d.location)}
-    ${ttRow('Region', d.region?.label || d.region)}
-    ${ttRow('Casualties', d.casualties ? fmtN(d.casualties) : null)}
+  tip.innerHTML = `  // Battle name at the top of the tooltip
+    <div class="tt-name">${d.name}</div>  // War name (if any) shown in italic amber below the battle name
+    ${d.war ? `<div class="tt-war">${truncate(d.war, 45)}</div>` : ''}  // Year row — formatted as 'N BC' or 'N AD'
+    ${ttRow('Year', fmtYear(d.year))}  // Location row — the place name from Wikidata
+    ${ttRow('Location', d.location)}  // Region row — the geographic region label
+    ${ttRow('Region', d.region?.label || d.region)}  // Casualties row — only shown if data is present
+    ${ttRow('Casualties', d.casualties ? fmtN(d.casualties) : null)}  // Wikipedia link at the bottom, opens in a new tab
     <a class="tt-wiki" href="${wikiUrl}" target="_blank">${wikiLabel}</a>
-  `;
-  tip.style.display = 'block';
+  `;  // Make the tooltip visible
+  tip.style.display = 'block';  // Position the tooltip near the mouse
   moveTip(ev);
-}
-function moveTip(e) {
-  const pad=14, w=300, h=260;
-  let x=e.clientX+pad, y=e.clientY+pad;
-  if (x+w>window.innerWidth)  x=e.clientX-w-pad;
+}  // moveTip(e): repositions the tooltip to follow the mouse, keeping it inside the viewport
+function moveTip(e) {  // Start position: offset from cursor so it doesn't cover the dot
+  const pad=14, w=300, h=260;  // Flip horizontally if the tooltip would overflow the right edge
+  let x=e.clientX+pad, y=e.clientY+pad;  // Flip vertically if the tooltip would overflow the bottom
+  if (x+w>window.innerWidth)  x=e.clientX-w-pad;  // Apply the computed position
   if (y+h>window.innerHeight) y=e.clientY-h-pad;
   tip.style.left=x+'px'; tip.style.top=y+'px';
 }
 // hideTip uses a short grace-period so the mouse can travel to the tooltip card
-function hideTip() {
-  clearTimeout(_tipTimer);
+function hideTip() {  // Cancel any existing timer before starting a new one
+  clearTimeout(_tipTimer);  // After the grace period, hide the tooltip element
   _tipTimer = setTimeout(() => { tip.style.display = 'none'; }, TIP_GRACE);
 }
 
@@ -759,13 +904,13 @@ function hideTip() {
      The `world` object is a single TopoJSON file fetched once in
      main() and passed to every map builder.
 ════════════════════════════════════════════════════════ */
-function makeProj(W, H) { return d3.geoNaturalEarth1().scale(W/6.3).translate([W/2, H/2]); }
-function drawBase(svg, world, proj) {
-  const path = d3.geoPath().projection(proj);
-  svg.append('path').datum({type:'Sphere'}).attr('class','sphere').attr('d',path);
-  svg.append('path').datum(d3.geoGraticule()()).attr('class','gratc').attr('d',path);
-  svg.append('g').selectAll('path')
-    .data(topojson.feature(world, world.objects.countries).features)
+function makeProj(W, H) { return d3.geoNaturalEarth1().scale(W/6.3).translate([W/2, H/2]); }  // makeProj(W, H): creates a Natural Earth1 projection centered in a W×H viewport
+function drawBase(svg, world, proj) {  // drawBase(svg, world, proj): renders the ocean sphere, graticule grid, and country polygons onto svg
+  const path = d3.geoPath().projection(proj);  // Creates a D3 geo path generator bound to the given projection
+  svg.append('path').datum({type:'Sphere'}).attr('class','sphere').attr('d',path);  // Draws the ocean background — a globe-shaped 'Sphere' datum rendered with the 'sphere' CSS class
+  svg.append('path').datum(d3.geoGraticule()()).attr('class','gratc').attr('d',path);  // Draws the graticule (10° lat/lon grid lines) with the 'gratc' CSS class
+  svg.append('g').selectAll('path')  // Converts the TopoJSON country features to GeoJSON and joins them as path elements
+    .data(topojson.feature(world, world.objects.countries).features)  // Renders each country polygon with the 'country' CSS class
     .join('path').attr('class','country').attr('d',path);
 }
 
@@ -783,34 +928,34 @@ function drawBase(svg, world, proj) {
    The result (~12 K unique, dated, valid battles) is the true dataset
    size.  The 22 K figure is the raw row count before dedup + filtering.
 ════════════════════════════════════════════════════════ */
-async function loadData() {
-  const raw = await d3.csv(P.battles);
-  setProgress(55, `Processing ${raw.length.toLocaleString()} records…`);
-  const battles = [];
-  const seenIds = new Set();
+async function loadData() {  // loadData(): fetches and parses the main battles CSV, deduplicates on Wikidata Q-number, and returns clean battle objects
+  const raw = await d3.csv(P.battles);  // Fetches the raw CSV; d3.csv() auto-parses it into an array of row objects
+  setProgress(55, `Processing ${raw.length.toLocaleString()} records…`);  // Shows a progress update with the raw row count
+  const battles = [];  // Array to accumulate deduplicated, valid battle records
+  const seenIds = new Set();  // Set of Wikidata entity IDs already seen — used to skip duplicate rows
   for (const r of raw) {
-    const year = parseYear(r.date);
-    if (year == null) continue;
-    const rawId = r.item ? r.item.replace('http://www.wikidata.org/entity/', '') : null;
-    if (rawId) { if (seenIds.has(rawId)) continue; seenIds.add(rawId); }
-    const coord = parseCoord(r.coord);
-    const rk    = coord ? regionKey(coord.lat, coord.lon) : 'other';
-    const reg   = REGIONS.find(x => x.key === rk) || REGIONS[REGIONS.length-1];
-    const era   = eraFor(year);
-    let dur = null;
-    const sy = parseYear(r.startDate), ey = parseYear(r.endDate);
-    if (sy != null && ey != null && ey >= sy) dur = Math.max(1, ey - sy) * 365;
-    const war     = (r.partOfLabel && r.partOfLabel.trim() && !r.partOfLabel.startsWith('http')) ? r.partOfLabel.trim() : null;
-    const article = (r.article && r.article.startsWith('https://en.wikipedia')) ? r.article : null;
-    battles.push({
-      id: rawId,
-      name: r.itemLabel || 'Unknown Battle',
-      year, war,
-      location: (r.locationLabel && !r.locationLabel.startsWith('http')) ? r.locationLabel : null,
-      lat: coord ? coord.lat : null,
-      lon: coord ? coord.lon : null,
-      region: reg, era,
-      casualties: (r.casualties && !isNaN(+r.casualties)) ? +r.casualties : null,
+    const year = parseYear(r.date);  // Parse the ISO-8601 date string into an integer year
+    if (year == null) continue;  // Skip rows with no parseable date (biggest filter)
+    const rawId = r.item ? r.item.replace('http://www.wikidata.org/entity/', '') : null;  // Extract the Q-number from the full Wikidata URI
+    if (rawId) { if (seenIds.has(rawId)) continue; seenIds.add(rawId); }  // If we've seen this Q-number before, skip the row (deduplication); otherwise register it
+    const coord = parseCoord(r.coord);  // Parse the WKT coordinate string into {lat, lon} or null
+    const rk    = coord ? regionKey(coord.lat, coord.lon) : 'other';  // Map the coordinate to a region key (or 'other')
+    const reg   = REGIONS.find(x => x.key === rk) || REGIONS[REGIONS.length-1];  // Find the full region object; fall back to the last region (other) if not found
+    const era   = eraFor(year);  // Find the era object for this battle year
+    let dur = null;  // Duration defaults to null — only set if both start and end dates are valid and end ≥ start
+    const sy = parseYear(r.startDate), ey = parseYear(r.endDate);  // Parse start and end years from Wikidata date fields
+    if (sy != null && ey != null && ey >= sy) dur = Math.max(1, ey - sy) * 365;  // Duration in days: at least 1 day, computed from year difference (rough approximation)
+    const war     = (r.partOfLabel && r.partOfLabel.trim() && !r.partOfLabel.startsWith('http')) ? r.partOfLabel.trim() : null;  // war: the parent conflict label — skip if it's a raw URI (Wikidata sometimes returns entity URIs instead of labels)
+    const article = (r.article && r.article.startsWith('https://en.wikipedia')) ? r.article : null;  // article: only keep the URL if it points to the English Wikipedia
+    battles.push({  // Push a clean battle object with all parsed fields
+      id: rawId,  // Wikidata Q-number (e.g. 'Q12345')
+      name: r.itemLabel || 'Unknown Battle',  // Battle name, defaulting to 'Unknown Battle' if missing
+      year, war,  // Parsed year and conflict name
+      location: (r.locationLabel && !r.locationLabel.startsWith('http')) ? r.locationLabel : null,  // Location label — skip if it's a raw Wikidata URI
+      lat: coord ? coord.lat : null,  // Latitude and longitude, or null if no coordinate was found
+      lon: coord ? coord.lon : null,  // Region object and era object
+      region: reg, era,  // Numeric casualty count, or null if absent or non-numeric
+      casualties: (r.casualties && !isNaN(+r.casualties)) ? +r.casualties : null,  // Wikipedia article URL and duration in days
       article, dur,
     });
   }
@@ -825,22 +970,22 @@ async function loadData() {
    Mercator projection (rather than Natural Earth) was chosen
    because it fills the tall rectangular pane more naturally.
 ════════════════════════════════════════════════════════ */
-function buildHeroMap(world, battles) {
-  const el = document.getElementById('hero-svg');
-  const W = el.clientWidth||700, H = el.clientHeight||800;
-  const svg = d3.select(el).attr('viewBox',`0 0 ${W} ${H}`);
-  const proj = d3.geoMercator().scale(W/7).translate([W*0.5, H*0.6]);
-  const path = d3.geoPath().projection(proj);
-  svg.append('path').datum({type:'Sphere'}).attr('class','sphere').attr('d',path);
-  svg.append('g').selectAll('path')
-    .data(topojson.feature(world, world.objects.countries).features)
-    .join('path').attr('class','country').attr('d',path);
-  svg.append('g').selectAll('circle')
-    .data(battles.filter(d => d.lat != null))
+function buildHeroMap(world, battles) {  // buildHeroMap(world, battles): draws a static decorative Mercator world map in the hero section
+  const el = document.getElementById('hero-svg');  // Get the SVG DOM element to measure its natural rendered size
+  const W = el.clientWidth||700, H = el.clientHeight||800;  // Use the element's client dimensions (falling back to 700×800 if not yet laid out)
+  const svg = d3.select(el).attr('viewBox',`0 0 ${W} ${H}`);  // Set the SVG viewBox to match those dimensions
+  const proj = d3.geoMercator().scale(W/7).translate([W*0.5, H*0.6]);  // Mercator projection: slightly offset vertically (0.6) to give more room to the Southern Hemisphere
+  const path = d3.geoPath().projection(proj);  // Create a geo path generator for this projection
+  svg.append('path').datum({type:'Sphere'}).attr('class','sphere').attr('d',path);  // Draw the ocean background sphere
+  svg.append('g').selectAll('path')  // Join country features from the TopoJSON world atlas
+    .data(topojson.feature(world, world.objects.countries).features)  // Convert the TopoJSON object to GeoJSON features
+    .join('path').attr('class','country').attr('d',path);  // Draw each country polygon
+  svg.append('g').selectAll('circle')  // Join all battles that have valid coordinates as tiny circles
+    .data(battles.filter(d => d.lat != null))  // Filter to battles with a known coordinate
     .join('circle')
-    .attr('cx', d => proj([d.lon, d.lat])[0])
-    .attr('cy', d => proj([d.lon, d.lat])[1])
-    .attr('r', 1.4).attr('fill', d => d.era.color).attr('fill-opacity', 0.45).attr('stroke','none');
+    .attr('cx', d => proj([d.lon, d.lat])[0])  // Position each circle at its projected coordinate
+    .attr('cy', d => proj([d.lon, d.lat])[1])  // Project the [lon, lat] pair and extract the y component
+    .attr('r', 1.4).attr('fill', d => d.era.color).attr('fill-opacity', 0.45).attr('stroke','none');  // Tiny 1.4px circles, semi-transparent, colored by era, no stroke
 }
 
 /* ══ ERA LEGEND ══════════════════════════════════════════
@@ -848,12 +993,12 @@ function buildHeroMap(world, battles) {
    scrolly map.  It simply iterates the ERAS array and appends
    a small div for each era to the #era-legend container.
 ════════════════════════════════════════════════════════ */
-function buildLegend() {
-  const w = d3.select('#era-legend');
-  ERAS.forEach(e => {
-    const row = w.append('div').attr('class','era-key');
-    row.append('div').attr('class','era-swatch').style('background', e.color);
-    row.append('span').text(e.label);
+function buildLegend() {  // buildLegend(): populates the #era-legend div with a color swatch + label for each era
+  const w = d3.select('#era-legend');  // Selects the legend container
+  ERAS.forEach(e => {  // Iterates the ERAS array to create one legend item per era
+    const row = w.append('div').attr('class','era-key');  // Creates a flex row div for this era
+    row.append('div').attr('class','era-swatch').style('background', e.color);  // Appends the colored circle swatch
+    row.append('span').text(e.label);  // Appends the era label text
   });
 }
 
@@ -862,45 +1007,45 @@ function buildLegend() {
    the step cards on the right.  Each step card has a data-era
    attribute that tells setEra() which era to display.
 ════════════════════════════════════════════════════════ */
-function buildScrollyMap(world, battles) {
-  const W=900, H=470;
-  const svg = d3.select('#scrolly-svg').attr('viewBox',`0 0 ${W} ${H}`);
-  const proj = makeProj(W, H);
-  const badge      = document.getElementById('year-badge');
-  const centInfoEl = document.getElementById('centroid-info');
-  const levelEl    = document.getElementById('sz-level');
+function buildScrollyMap(world, battles) {  // buildScrollyMap(world, battles): builds the Chapter I sticky world map with era-filtering and centroid trail
+  const W=900, H=470;  // Fixed viewBox dimensions for the scrolly SVG
+  const svg = d3.select('#scrolly-svg').attr('viewBox',`0 0 ${W} ${H}`);  // Set the viewBox on the SVG element
+  const proj = makeProj(W, H);  // Create a Natural Earth projection sized to the viewBox
+  const badge      = document.getElementById('year-badge');  // References to DOM elements updated by setEra()
+  const centInfoEl = document.getElementById('centroid-info');  // Year badge watermark element
+  const levelEl    = document.getElementById('sz-level');  // Centroid coordinate label element
 
-  svg.append('defs').append('clipPath').attr('id','scrolly-clip')
-    .append('rect').attr('width',W).attr('height',H);
-  const mapG = svg.append('g').attr('clip-path','url(#scrolly-clip)');
+  svg.append('defs').append('clipPath').attr('id','scrolly-clip')  // Define a clipPath rect that exactly matches the SVG viewBox to prevent dots from overflowing
+    .append('rect').attr('width',W).attr('height',H);  // Create the map group that will be clipped
+  const mapG = svg.append('g').attr('clip-path','url(#scrolly-clip)');  // Draw the ocean, graticule, and countries into the clipped group
   drawBase(mapG, world, proj);
 
   // Ghost layer: all battles faintly visible
-  mapG.append('g').selectAll('circle')
+  mapG.append('g').selectAll('circle')  // Selects only battles with valid lat/lon
     .data(battles.filter(d => d.lat != null))
-    .join('circle')
-    .attr('cx', d => proj([d.lon, d.lat])[0])
-    .attr('cy', d => proj([d.lon, d.lat])[1])
+    .join('circle')  // Project each battle to its SVG coordinate
+    .attr('cx', d => proj([d.lon, d.lat])[0])  // Same for the y coordinate
+    .attr('cy', d => proj([d.lon, d.lat])[1])  // Tiny white circles at 4% opacity — just enough to hint at density
     .attr('r', 1.2).attr('fill','#fff').attr('fill-opacity',0.04).attr('stroke','none');
 
-  const dotsG  = mapG.append('g');
+  const dotsG  = mapG.append('g');  // trailG: group for the centroid trail line and markers
   const trailG = mapG.append('g');
 
   // Pre-compute centroid for each era
-  const eraCentroids = ERAS.map(era => {
-    const sub = battles.filter(d => d.lat != null && d.year >= era.min && d.year <= era.max);
-    if (!sub.length) return null;
+  const eraCentroids = ERAS.map(era => {  // Filter battles belonging to this era that have coordinates
+    const sub = battles.filter(d => d.lat != null && d.year >= era.min && d.year <= era.max);  // Skip if no data for this era
+    if (!sub.length) return null;  // Return an object with era reference, mean lat, mean lon, and battle count
     return { era, lat: d3.mean(sub, d=>d.lat), lon: d3.mean(sub, d=>d.lon), n: sub.length };
   });
 
   // Populate centroid text in step cards
-  ERAS.forEach((era, i) => {
+  ERAS.forEach((era, i) => {  // Skip if the span element doesn't exist in the DOM
     const c = eraCentroids[i];
     const el = document.getElementById(`cc-${era.key}`);
-    if (!el) return;
-    if (!c) { el.textContent = 'insufficient data'; return; }
-    const latStr = `${Math.abs(c.lat).toFixed(1)}°${c.lat>=0?'N':'S'}`;
-    const lonStr = `${Math.abs(c.lon).toFixed(1)}°${c.lon>=0?'E':'W'}`;
+    if (!el) return;  // Insufficient data message for eras with no valid battles
+    if (!c) { el.textContent = 'insufficient data'; return; }  // Format lat as 'N' or 'S' with one decimal place
+    const latStr = `${Math.abs(c.lat).toFixed(1)}°${c.lat>=0?'N':'S'}`;  // Format lon as 'E' or 'W' with one decimal place
+    const lonStr = `${Math.abs(c.lon).toFixed(1)}°${c.lon>=0?'E':'W'}`;  // Write the coordinate string and battle count into the callout span
     el.textContent = `${latStr}, ${lonStr} · n=${c.n.toLocaleString()}`;
   });
 
@@ -908,68 +1053,68 @@ function buildScrollyMap(world, battles) {
   // Allow wheel zoom on the scrolly map so users can zoom in without
   // using the +/- buttons. The map sits in a sticky pane so wheel events
   // that are consumed by d3-zoom won't bubble up to scroll the page.
-  const zoom = d3.zoom().scaleExtent([1,16])
-    .on('zoom', ev => {
-      curK = ev.transform.k;
-      mapG.attr('transform', ev.transform);
+  const zoom = d3.zoom().scaleExtent([1,16])  // scaleExtent: zoom from 1× to 16×
+    .on('zoom', ev => {  // On every zoom event: update curK and transform the map group
+      curK = ev.transform.k;  // Scale the active dots inversely to the zoom so they maintain apparent size
+      mapG.attr('transform', ev.transform);  // Update the zoom level readout label
       dotsG.selectAll('.fdot').attr('r', 1/Math.sqrt(curK)*3.5);
       levelEl.textContent = curK.toFixed(1)+'×';
-    });
-  svg.call(zoom);
-  document.getElementById('sz-in') .addEventListener('click', () => svg.transition().duration(320).call(zoom.scaleBy,2));
-  document.getElementById('sz-out').addEventListener('click', () => svg.transition().duration(320).call(zoom.scaleBy,0.5));
+    });  // Attach the zoom behavior to the SVG element
+  svg.call(zoom);  // Zoom-in button: double the current scale with a smooth transition
+  document.getElementById('sz-in') .addEventListener('click', () => svg.transition().duration(320).call(zoom.scaleBy,2));  // Zoom-out button: halve the current scale
+  document.getElementById('sz-out').addEventListener('click', () => svg.transition().duration(320).call(zoom.scaleBy,0.5));  // Reset button: returns to identity transform (no zoom/pan)
   document.getElementById('sz-rst').addEventListener('click', () => svg.transition().duration(420).call(zoom.transform, d3.zoomIdentity));
 
-  function setEra(key) {
-    const eraIdx = ERAS.findIndex(e => e.key === key);
-    const era    = ERAS[eraIdx];
-    if (!era) return;
-    const data = battles.filter(d => d.lat != null && d.year >= era.min && d.year <= era.max);
-    badge.textContent = era.label;
-    badge.style.color = era.color + '22';
-    const rScale = 1/Math.sqrt(curK);
-    dotsG.selectAll('.fdot').data(data, d => d.id || d.name).join(
-      en => en.append('circle').attr('class','bdot fdot')
-        .attr('cx', d => proj([d.lon, d.lat])[0])
-        .attr('cy', d => proj([d.lon, d.lat])[1])
-        .attr('r', 0).attr('fill', d => d.era.color).attr('fill-opacity', 0.82)
-        .attr('stroke', d => d.era.color).attr('stroke-width', 0.8).attr('stroke-opacity', 0.3)
-        .on('mouseover', (ev,d) => showTip(ev,d))
-        .on('mousemove', moveTip).on('mouseout', hideTip)
-        .call(s => s.transition().duration(500).attr('r', rScale*3.5)),
+  function setEra(key) {  // Find the index of the era in the ERAS array
+    const eraIdx = ERAS.findIndex(e => e.key === key);  // Retrieve the era object
+    const era    = ERAS[eraIdx];  // Guard: do nothing if the key doesn't match any era
+    if (!era) return;  // Filter to battles in this era's year range that have coordinates
+    const data = battles.filter(d => d.lat != null && d.year >= era.min && d.year <= era.max);  // Update the large watermark badge with the era label
+    badge.textContent = era.label;  // Set the badge color to the era color at 13% opacity (faint watermark)
+    badge.style.color = era.color + '22';  // Compute inverse-zoom radius so dots look the same size regardless of zoom level
+    const rScale = 1/Math.sqrt(curK);  // Data-join the era's battles: enter new dots, update existing, exit old ones
+    dotsG.selectAll('.fdot').data(data, d => d.id || d.name).join(  // Entering dots: create circle elements with position, size, and color
+      en => en.append('circle').attr('class','bdot fdot')  // cx: project the longitude to SVG x-coordinate
+        .attr('cx', d => proj([d.lon, d.lat])[0])  // cy: project the latitude to SVG y-coordinate
+        .attr('cy', d => proj([d.lon, d.lat])[1])  // Start at radius 0 then animate to the scaled radius
+        .attr('r', 0).attr('fill', d => d.era.color).attr('fill-opacity', 0.82)  // Stroke color matches fill for a subtle glow
+        .attr('stroke', d => d.era.color).attr('stroke-width', 0.8).attr('stroke-opacity', 0.3)  // Bind mouseover/mousemove/mouseout events for the tooltip
+        .on('mouseover', (ev,d) => showTip(ev,d))  // Animate radius to 0 then remove exiting dots
+        .on('mousemove', moveTip).on('mouseout', hideTip)  // Transition updating dots to the new radius and fill color
+        .call(s => s.transition().duration(500).attr('r', rScale*3.5)),  // Transition exiting dots to r=0 then remove from DOM
       up => up.transition().duration(400).attr('r', rScale*3.5).attr('fill', d => d.era.color),
       ex => ex.transition().duration(300).attr('r', 0).remove()
-    );
+    );  // Clear the centroid trail group before redrawing
 
-    trailG.selectAll('*').remove();
-    const trailCents = eraCentroids.slice(0, eraIdx+1).filter(Boolean);
-    if (trailCents.length > 1) {
-      const line = d3.line()
-        .x(c => proj([c.lon, c.lat])[0]).y(c => proj([c.lon, c.lat])[1])
-        .curve(d3.curveCatmullRom.alpha(0.5));
-      trailG.append('path').datum(trailCents).attr('d', line)
-        .attr('fill','none').attr('stroke','rgba(200,151,58,0.4)')
-        .attr('stroke-width', 1.8).attr('stroke-dasharray','5 3');
+    trailG.selectAll('*').remove();  // Only draw a trail line if there are at least 2 centroid points to connect
+    const trailCents = eraCentroids.slice(0, eraIdx+1).filter(Boolean);  // d3.line() generator: maps each centroid to its projected SVG coordinate
+    if (trailCents.length > 1) {  // x accessor: project longitude
+      const line = d3.line()  // y accessor: project latitude
+        .x(c => proj([c.lon, c.lat])[0]).y(c => proj([c.lon, c.lat])[1])  // Catmull-Rom curve with alpha=0.5 gives a smooth centrifugal spline
+        .curve(d3.curveCatmullRom.alpha(0.5));  // Append the path and style it as a dashed amber line
+      trailG.append('path').datum(trailCents).attr('d', line)  // Draw small circles at all PREVIOUS centroid positions (not the current one)
+        .attr('fill','none').attr('stroke','rgba(200,151,58,0.4)')  // Semi-transparent circles showing past positions
+        .attr('stroke-width', 1.8).attr('stroke-dasharray','5 3');  // Stroke ring around each past centroid
     }
     trailCents.slice(0,-1).forEach(c => {
       trailG.append('circle')
         .attr('cx', proj([c.lon, c.lat])[0]).attr('cy', proj([c.lon, c.lat])[1])
         .attr('r', 5).attr('fill', c.era.color).attr('fill-opacity', 0.45)
         .attr('stroke', c.era.color).attr('stroke-width', 1);
-    });
-    const cur = trailCents[trailCents.length-1];
-    if (cur) {
-      const [cx, cy] = proj([cur.lon, cur.lat]);
+    });  // Current (latest) centroid — draw a large highlighted marker
+    const cur = trailCents[trailCents.length-1];  // Project the current centroid position
+    if (cur) {  // Solid inner circle for the current centroid — slightly larger than past ones
+      const [cx, cy] = proj([cur.lon, cur.lat]);  // Outer pulsing ring (transparent fill, era-colored stroke) to draw the eye
       trailG.append('circle').attr('cx',cx).attr('cy',cy).attr('r',10)
         .attr('fill', era.color).attr('fill-opacity', 0.85).attr('stroke','#fff').attr('stroke-width', 2);
       trailG.append('circle').attr('cx',cx).attr('cy',cy).attr('r',18)
-        .attr('fill','none').attr('stroke', era.color).attr('stroke-opacity',0.3).attr('stroke-width',1);
+        .attr('fill','none').attr('stroke', era.color).attr('stroke-opacity',0.3).attr('stroke-width',1);  // Format coordinates for the centroid-info readout below the map
       // Coordinates shown only in step card callout and centroid-info — not repeated as map label
       const latStr = `${Math.abs(cur.lat).toFixed(1)}°${cur.lat>=0?'N':'S'}, ${Math.abs(cur.lon).toFixed(1)}°${cur.lon>=0?'E':'W'}`;
       centInfoEl.textContent = `Centroid — ${latStr}`;
       centInfoEl.style.color = era.color;
     }
-  }
+  }  // Initialize the map showing the 'ancient' era
 
   setEra('ancient');
   return { setEra };
@@ -979,14 +1124,14 @@ function buildScrollyMap(world, battles) {
    An interactive animated world map where battles appear as
    coloured dots through time.
 ════════════════════════════════════════════════════════ */
-function buildExploreMap(world, battles) {
-  const W=960, H=500;
-  const svg  = d3.select('#explore-svg').attr('viewBox',`0 0 ${W} ${H}`);
-  const proj = makeProj(W, H);
-  svg.append('defs').append('clipPath').attr('id','explore-clip')
-    .append('rect').attr('width',W).attr('height',H);
-  const mapG = svg.append('g').attr('clip-path','url(#explore-clip)');
-  drawBase(mapG, world, proj);
+function buildExploreMap(world, battles) {  // buildExploreMap(world, battles): Chapter II interactive animated map — battles accumulate through time
+  const W=960, H=500;  // Fixed viewBox dimensions
+  const svg  = d3.select('#explore-svg').attr('viewBox',`0 0 ${W} ${H}`);  // Set the SVG viewBox
+  const proj = makeProj(W, H);  // ClipPath to contain dots inside the map bounds
+  svg.append('defs').append('clipPath').attr('id','explore-clip')  // Rect that matches the full viewBox
+    .append('rect').attr('width',W).attr('height',H);  // Map group clipped to the viewBox
+  const mapG = svg.append('g').attr('clip-path','url(#explore-clip)');  // Draw base map layers
+  drawBase(mapG, world, proj);  // layer: group for the animated battle dots
   const layer = mapG.append('g');
 
   const slider   = document.getElementById('yr-slider');
@@ -997,113 +1142,113 @@ function buildExploreMap(world, battles) {
   const resetBtn = document.getElementById('reset-btn');
   const levelEl  = document.getElementById('ez-level');
 
-  const TRAIL = 50;
-  let curYear = -500;
-  let filterRegion = 'all';
-  let timer = null;
-  let curK  = 1;
-  let speed = 1; // 1 = normal, 10 = fast; button label shows what you'd switch TO
+  const TRAIL = 50;  // TRAIL: how many years of battles to show at once (50-year trailing window)
+  let curYear = -500;  // curYear: the currently displayed year, starts at 500 BC
+  let filterRegion = 'all';  // filterRegion: currently active region filter ('all' or a region key)
+  let timer = null;  // timer: d3.interval handle for the animation loop; null when not playing
+  let curK  = 1;  // curK: current zoom scale (used to scale dots inversely)
+  let speed = 1; // 1 = normal, 10 = fast; button label shows what you'd switch TO  // speed: animation step multiplier — 1 = 2 years/tick, 10 = 20 years/tick
 
-  const zoom = d3.zoom().scaleExtent([1,20])
-    .on('zoom', ev => {
+  const zoom = d3.zoom().scaleExtent([1,20])  // d3.zoom: pan/zoom for the explore map, allowing up to 20× zoom
+    .on('zoom', ev => {  // On zoom: update curK, transform the map, rescale dots, update the level readout
       curK = ev.transform.k;
       mapG.attr('transform', ev.transform);
       layer.selectAll('.edot').attr('r', 1/Math.sqrt(curK)*2.8);
       if (levelEl) levelEl.textContent = curK.toFixed(1)+'×';
-    });
-  svg.call(zoom);
-  document.getElementById('ez-in') ?.addEventListener('click', () => svg.transition().duration(300).call(zoom.scaleBy,2));
-  document.getElementById('ez-out')?.addEventListener('click', () => svg.transition().duration(300).call(zoom.scaleBy,0.5));
+    });  // Attach zoom to the explore SVG
+  svg.call(zoom);  // Zoom-in button: double the scale
+  document.getElementById('ez-in') ?.addEventListener('click', () => svg.transition().duration(300).call(zoom.scaleBy,2));  // Zoom-out button: halve the scale
+  document.getElementById('ez-out')?.addEventListener('click', () => svg.transition().duration(300).call(zoom.scaleBy,0.5));  // Reset button: return to 1:1 zoom
   document.getElementById('ez-rst')?.addEventListener('click', () => svg.transition().duration(420).call(zoom.transform, d3.zoomIdentity));
 
-  function yearLabel(y) { return y < 0 ? Math.abs(y)+' BC' : y+' AD'; }
-  function visible(y) {
-    return battles.filter(d => {
-      if (d.lat == null) return false;
-      if (d.year > y || d.year < y - TRAIL) return false;
+  function yearLabel(y) { return y < 0 ? Math.abs(y)+' BC' : y+' AD'; }  // yearLabel(y): helper to format a year as 'N BC' or 'N AD' for the year display
+  function visible(y) {  // visible(y): returns the battles that should be visible at year y (within the TRAIL window, matching the region filter)
+    return battles.filter(d => {  // Exclude battles with no coordinates
+      if (d.lat == null) return false;  // Exclude battles outside the trailing window
+      if (d.year > y || d.year < y - TRAIL) return false;  // Exclude battles not in the selected region when a filter is active
       if (filterRegion !== 'all' && d.region.key !== filterRegion) return false;
       return true;
     });
   }
-  function render(y) {
-    yrLabel.textContent = yearLabel(y);
-    slider.value = y;
-    const data = visible(y);
-    tallyEl.textContent = data.length;
-    const rScale = 1/Math.sqrt(curK);
-    layer.selectAll('.edot').data(data, d => d.id || d.name).join(
-      en => en.append('circle').attr('class','bdot edot')
+  function render(y) {  // render(y): updates the explore map to display year y — called by the slider and animation timer
+    yrLabel.textContent = yearLabel(y);  // Update the year label display
+    slider.value = y;  // Move the slider thumb to the current year
+    const data = visible(y);  // Get the visible battles for this year
+    tallyEl.textContent = data.length;  // Update the battle count tally
+    const rScale = 1/Math.sqrt(curK);  // Compute dot radius accounting for zoom level
+    layer.selectAll('.edot').data(data, d => d.id || d.name).join(  // Data-join: enter new dots, update existing, exit departed
+      en => en.append('circle').attr('class','bdot edot')  // Entering: create circle at projected position, initially r=0
         .attr('cx', d => proj([d.lon, d.lat])[0])
-        .attr('cy', d => proj([d.lon, d.lat])[1])
+        .attr('cy', d => proj([d.lon, d.lat])[1])  // Animate radius in and compute fade opacity based on age within the trail window
         .attr('r', 0).attr('fill', d => d.era.color)
         .attr('stroke', d => d.era.color).attr('stroke-width', 0.7).attr('stroke-opacity', 0.2)
         .on('mouseover', (ev,d) => showTip(ev,d))
         .on('mousemove', moveTip).on('mouseout', hideTip)
         .call(s => s.transition().duration(300)
-          .attr('r', rScale*2.8)
+          .attr('r', rScale*2.8)  // Updating: set opacity (older battles more transparent) and radius
           .attr('fill-opacity', d => 0.35 + 0.65*((d.year-(y-TRAIL))/TRAIL))),
       up => up
-        .attr('fill-opacity', d => 0.35 + 0.65*((d.year-(y-TRAIL))/TRAIL))
+        .attr('fill-opacity', d => 0.35 + 0.65*((d.year-(y-TRAIL))/TRAIL))  // Exiting: animate to r=0 and invisible then remove
         .attr('r', rScale*2.8),
       ex => ex.transition().duration(250).attr('r',0).attr('fill-opacity',0).remove()
     );
   }
 
-  slider.addEventListener('input', () => { curYear = +slider.value; render(curYear); });
+  slider.addEventListener('input', () => { curYear = +slider.value; render(curYear); });  // Slider input event: update curYear and re-render whenever the user drags the slider
 
-  playBtn.addEventListener('click', () => {
-    if (timer) {
-      timer.stop(); timer = null;
-      playBtn.textContent = '▶ Play';
+  playBtn.addEventListener('click', () => {  // Play/Pause button click handler
+    if (timer) {  // If already playing, stop the animation
+      timer.stop(); timer = null;  // Stop the d3.interval and null the handle
+      playBtn.textContent = '▶ Play';  // Reset button label to Play
     } else {
-      if (curYear >= 2026) curYear = -500;
-      playBtn.textContent = '⏸ Pause';
-      timer = d3.interval(() => {
+      if (curYear >= 2026) curYear = -500;  // If not playing: wrap around if at the end
+      playBtn.textContent = '⏸ Pause';  // Change button label to Pause
+      timer = d3.interval(() => {  // Start the d3.interval animation loop at 40ms per tick (≈25 fps)
         // CLAMP before checking stop condition — this ensures the animation
         // always ends at exactly 2026 regardless of the step size or speed.
-        curYear = Math.min(curYear + 2 * speed, 2026);
+        curYear = Math.min(curYear + 2 * speed, 2026);  // Advance curYear by 2 × speed years per tick
         render(curYear);
-        if (curYear >= 2026) {
-          timer.stop(); timer = null;
-          playBtn.textContent = '▶ Play';
-        }
+        if (curYear >= 2026) {  // Re-render the map at the new year
+          timer.stop(); timer = null;  // Stop the animation when the end year is reached
+          playBtn.textContent = '▶ Play';  // Null the timer handle
+        }  // Reset button label to Play
       }, 40);
     }
   });
 
   // Speed toggle — label describes what you will switch TO on click
-  speedBtn.addEventListener('click', () => {
-    if (speed === 1) {
-      speed = 10;
-      speedBtn.textContent = '▶ Normal';   // currently fast; click to go normal
+  speedBtn.addEventListener('click', () => {  // If currently normal speed, switch to fast
+    if (speed === 1) {  // Speed multiplier × 10
+      speed = 10;  // Button now says 'Normal' (click to go back to normal)
+      speedBtn.textContent = '▶ Normal';   // currently fast; click to go normal  // Highlight button in amber to show 'fast mode is active'
       speedBtn.style.borderColor = 'var(--amber)';
-      speedBtn.style.color = 'var(--amber)';
-    } else {
-      speed = 1;
-      speedBtn.textContent = '▶▶ Fast';   // currently normal; click to go fast
+      speedBtn.style.color = 'var(--amber)';  // If currently fast, switch to normal speed
+    } else {  // Speed multiplier back to 1
+      speed = 1;  // Button returns to '▶▶ Fast'
+      speedBtn.textContent = '▶▶ Fast';   // currently normal; click to go fast  // Clear inline color overrides, reverting to the btn-g stylesheet style
       speedBtn.style.borderColor = '';
       speedBtn.style.color = '';
     }
   });
 
-  resetBtn.addEventListener('click', () => {
-    if (timer) { timer.stop(); timer = null; }
-    playBtn.textContent = '▶ Play';
-    curYear = -500;
-    render(curYear);
+  resetBtn.addEventListener('click', () => {  // Reset button: stop animation, reset year to 500 BC, and re-render
+    if (timer) { timer.stop(); timer = null; }  // Stop any running animation timer
+    playBtn.textContent = '▶ Play';  // Reset play button label
+    curYear = -500;  // Return to the start year
+    render(curYear);  // Re-render at year -500
   });
 
   // FIX: scope to [data-f] only — do not touch [data-cera] chips
-  document.querySelectorAll('.chip[data-f]').forEach(c => {
-    c.addEventListener('click', () => {
-      document.querySelectorAll('.chip[data-f]').forEach(x => x.classList.remove('on'));
-      c.classList.add('on');
-      filterRegion = c.dataset.f;
-      render(curYear);
+  document.querySelectorAll('.chip[data-f]').forEach(c => {  // Use [data-f] selector to avoid touching CDB90's [data-cera] chips
+    c.addEventListener('click', () => {  // On click: deactivate all chips, activate the clicked one
+      document.querySelectorAll('.chip[data-f]').forEach(x => x.classList.remove('on'));  // Remove 'on' class from all region chips
+      c.classList.add('on');  // Activate only the clicked chip
+      filterRegion = c.dataset.f;  // Update the active filter from the chip's data attribute
+      render(curYear);  // Re-render the map with the new filter
     });
   });
 
-  render(-500);
+  render(-500);  // Initial render at year -500 to draw the starting state before any user interaction
 }
 
 /* ══ CHAPTER II — DOC GAP CHARTS ════════════════════════
@@ -1115,45 +1260,45 @@ function buildExploreMap(world, battles) {
    The normalised chart reveals the "documentation gap" more
    starkly than raw counts.
 ════════════════════════════════════════════════════════ */
-function buildDocGapCharts(battles) {
-  const withCoord = battles.filter(d => d.lat != null);
-  const regionCounts = {};
-  REGIONS.forEach(r => regionCounts[r.key] = 0);
-  withCoord.forEach(d => regionCounts[d.region.key]++);
-  const total = d3.sum(Object.values(regionCounts));
-  const europePct = Math.round(regionCounts['europe'] / total * 100);
-  document.getElementById('europe-pct').textContent = europePct + '%';
-  const normalized = REGIONS.map(r => ({ ...r, count: regionCounts[r.key], perArea: regionCounts[r.key]/r.area }));
-  const maxPer = d3.max(normalized, d => d.perArea);
-  const africaPer = normalized.find(d => d.key === 'ssafrica').perArea;
+function buildDocGapCharts(battles) {  // buildDocGapCharts(battles): builds the two horizontal bar charts for Chapter II
+  const withCoord = battles.filter(d => d.lat != null);  // Only battles with valid coordinates contribute to regional counts
+  const regionCounts = {};  // Initialize a count of zero for each region
+  REGIONS.forEach(r => regionCounts[r.key] = 0);  // Tally each battle into its region bucket
+  withCoord.forEach(d => regionCounts[d.region.key]++);  // Total battles across all regions (for computing percentages)
+  const total = d3.sum(Object.values(regionCounts));  // Percentage of all documented battles that occurred in Europe
+  const europePct = Math.round(regionCounts['europe'] / total * 100);  // Update the big '#' insight element at the top of the raw-count chart
+  document.getElementById('europe-pct').textContent = europePct + '%';  // Compute battles-per-million-km² for each region
+  const normalized = REGIONS.map(r => ({ ...r, count: regionCounts[r.key], perArea: regionCounts[r.key]/r.area }));  // Maximum density across all regions (used to compute the Europe/Africa ratio)
+  const maxPer = d3.max(normalized, d => d.perArea);  // Sub-Saharan Africa's density
+  const africaPer = normalized.find(d => d.key === 'ssafrica').perArea;  // Compute how many times more dense Europe is than Africa and display it
   document.getElementById('africa-deficit').textContent = Math.round(maxPer/africaPer)+'×';
 
-  const rawData  = REGIONS.filter(r => r.key !== 'other').map(r => ({ ...r, count: regionCounts[r.key] })).sort((a,b) => b.count-a.count);
+  const rawData  = REGIONS.filter(r => r.key !== 'other').map(r => ({ ...r, count: regionCounts[r.key] })).sort((a,b) => b.count-a.count);  // normData: regions sorted by per-area density for the right bar chart
   const normData = REGIONS.filter(r => r.key !== 'other').map(r => ({ ...r, count: regionCounts[r.key], val: regionCounts[r.key]/r.area })).sort((a,b) => b.val-a.val);
 
-  function buildHBar(svgId, data, accessor, fmtFn) {
+  function buildHBar(svgId, data, accessor, fmtFn) {  // buildHBar: generic horizontal bar chart builder used for both charts
     // Increase right margin so value labels don't overflow the white border
-    const W=400, H=280, mt=14, mr=48, mb=30, ml=142;
-    const iW=W-ml-mr, iH=H-mt-mb;
-    const g = d3.select(svgId).append('g').attr('transform',`translate(${ml},${mt})`);
-    const y = d3.scaleBand().domain(data.map(d=>d.label)).range([0,iH]).padding(0.28);
-    const x = d3.scaleLinear().domain([0, d3.max(data, accessor)*1.08]).range([0,iW]);
-    g.append('g').attr('class','grid').call(d3.axisBottom(x).tickSize(iH).tickFormat('').ticks(5)).selectAll('line').attr('opacity',0.04);
-    g.selectAll('rect').data(data).join('rect')
-      .attr('y', d => y(d.label)).attr('x', 0).attr('height', y.bandwidth()).attr('width', d => x(accessor(d)))
-      .attr('fill', d => d.color).attr('fill-opacity', 0.82).attr('rx', 1)
+    const W=400, H=280, mt=14, mr=48, mb=30, ml=142;  // Inner chart dimensions after subtracting margins
+    const iW=W-ml-mr, iH=H-mt-mb;  // Create the chart group at the correct offset inside the SVG
+    const g = d3.select(svgId).append('g').attr('transform',`translate(${ml},${mt})`);  // y scale: band scale mapping region labels to vertical positions
+    const y = d3.scaleBand().domain(data.map(d=>d.label)).range([0,iH]).padding(0.28);  // x scale: linear scale from 0 to 8% above the max value
+    const x = d3.scaleLinear().domain([0, d3.max(data, accessor)*1.08]).range([0,iW]);  // Faint vertical grid lines
+    g.append('g').attr('class','grid').call(d3.axisBottom(x).tickSize(iH).tickFormat('').ticks(5)).selectAll('line').attr('opacity',0.04);  // One rect per region: colored, slightly transparent, hover-able
+    g.selectAll('rect').data(data).join('rect')  // Position and size each bar
+      .attr('y', d => y(d.label)).attr('x', 0).attr('height', y.bandwidth()).attr('width', d => x(accessor(d)))  // Fill with the region color; hover brightens it and shows a tooltip
+      .attr('fill', d => d.color).attr('fill-opacity', 0.82).attr('rx', 1)  // Tooltip shows region name, raw count, and density
       .on('mouseover', function(ev,d) { d3.select(this).attr('fill-opacity',1); tip.innerHTML=`<div class="tt-name">${d.label}</div>${ttRow('Battles',fmtN(d.count))}${ttRow('Per M km²',d3.format('.1f')(d.count/d.area))}`; tip.style.display='block'; moveTip(ev); })
-      .on('mousemove', moveTip).on('mouseout', function() { d3.select(this).attr('fill-opacity',0.82); hideTip(); });
+      .on('mousemove', moveTip).on('mouseout', function() { d3.select(this).attr('fill-opacity',0.82); hideTip(); });  // Value label to the right of each bar (clamped so it never overflows the SVG)
     // Value labels: cap their x position so they never exceed iW (which would overflow the card border)
-    g.selectAll('.vl').data(data).join('text').attr('class','vl')
+    g.selectAll('.vl').data(data).join('text').attr('class','vl')  // y: vertically centered on the bar band
       .attr('x', d => Math.min(x(accessor(d))+4, iW-2))
-      .attr('y', d => y(d.label)+y.bandwidth()/2+3.5)
-      .attr('fill','var(--ink2)').attr('font-family','var(--ffM)').attr('font-size','8px').text(d => fmtFn(accessor(d)));
-    g.append('g').attr('class','axis').call(d3.axisLeft(y).tickSize(0)).selectAll('text').attr('dx','-4px');
+      .attr('y', d => y(d.label)+y.bandwidth()/2+3.5)  // Format label text using the provided format function
+      .attr('fill','var(--ink2)').attr('font-family','var(--ffM)').attr('font-size','8px').text(d => fmtFn(accessor(d)));  // Left axis: region labels
+    g.append('g').attr('class','axis').call(d3.axisLeft(y).tickSize(0)).selectAll('text').attr('dx','-4px');  // Bottom axis: value axis with 5 ticks
     g.append('g').attr('class','axis').attr('transform',`translate(0,${iH})`).call(d3.axisBottom(x).ticks(5).tickSize(3).tickFormat(fmtFn));
   }
 
-  buildHBar('#c-region-raw',  rawData,  d => d.count, d => fmtN(d));
+  buildHBar('#c-region-raw',  rawData,  d => d.count, d => fmtN(d));  // Build the normalized chart in #c-region-norm using battles/km²
   buildHBar('#c-region-norm', normData, d => d.val,   d => d3.format('.1f')(d));
 }
 
@@ -1170,49 +1315,49 @@ function buildDocGapCharts(battles) {
      • WWII      (1942)     — peak of the largest single-bin count
 
 ════════════════════════════════════════════════════════ */
-function buildRhythmChart(battles) {
-  const BIN=25, MIN_Y=-500, MAX_Y=2026;
-  const bins = d3.range(MIN_Y, MAX_Y, BIN);
-  const histData = bins.map(binStart => {
-    const sub = battles.filter(d => d.year >= binStart && d.year < binStart+BIN);
-    const obj = { year: binStart, total: sub.length };
-    REGIONS.forEach(r => { obj[r.key] = sub.filter(d => d.region.key === r.key).length; });
+function buildRhythmChart(battles) {  // buildRhythmChart(battles): Chapter III stacked area histogram — battles per 25-year bin colored by region
+  const BIN=25, MIN_Y=-500, MAX_Y=2026;  // BIN size in years; range from 500 BC to 2026 AD
+  const bins = d3.range(MIN_Y, MAX_Y, BIN);  // Generate bin start years at every 25-year interval
+  const histData = bins.map(binStart => {  // For each bin: count battles by region and store the per-region breakdown
+    const sub = battles.filter(d => d.year >= binStart && d.year < binStart+BIN);  // Filter battles that fall within this bin
+    const obj = { year: binStart, total: sub.length };  // Store bin start year and total count
+    REGIONS.forEach(r => { obj[r.key] = sub.filter(d => d.region.key === r.key).length; });  // For each region, count battles in this bin belonging to that region
     return obj;
-  });
-  const keys   = REGIONS.map(r => r.key);
-  const colors = Object.fromEntries(REGIONS.map(r => [r.key, r.color]));
-  const series = d3.stack().keys(keys)(histData);
-  const W=900, H=320, mt=14, mr=18, mb=42, ml=52;
-  const iW=W-ml-mr, iH=H-mt-mb;
-  const svg = d3.select('#c-rhythm').attr('viewBox',`0 0 ${W} ${H}`);
-  const g   = svg.append('g').attr('transform',`translate(${ml},${mt})`);
-  const x   = d3.scaleLinear().domain([MIN_Y, MAX_Y]).range([0, iW]);
-  const barW = Math.max(1, x(MIN_Y+BIN)-x(MIN_Y)-0.5);
-  const yMax = d3.max(series, s => d3.max(s, d => d[1]));
-  const y    = d3.scaleLinear().domain([0, yMax*1.05]).range([iH, 0]);
-  g.append('g').attr('class','grid').call(d3.axisLeft(y).tickSize(-iW).tickFormat('').ticks(5));
-  series.forEach(s => {
-    g.selectAll(`.rb-${s.key}`).data(s).join('rect').attr('class',`rb-${s.key}`)
-      .attr('x', d => x(d.data.year)).attr('y', d => y(d[1]))
-      .attr('width', barW).attr('height', d => Math.max(0, y(d[0])-y(d[1])))
-      .attr('fill', colors[s.key]).attr('fill-opacity', 0.82)
+  });  // Region keys for the D3 stack
+  const keys   = REGIONS.map(r => r.key);  // Color lookup: region key → hex color string
+  const colors = Object.fromEntries(REGIONS.map(r => [r.key, r.color]));  // d3.stack(): generates stacked layer data for the area chart
+  const series = d3.stack().keys(keys)(histData);  // Chart dimensions and margins
+  const W=900, H=320, mt=14, mr=18, mb=42, ml=52;  // Inner (drawing area) dimensions
+  const iW=W-ml-mr, iH=H-mt-mb;  // Select the SVG and set its viewBox
+  const svg = d3.select('#c-rhythm').attr('viewBox',`0 0 ${W} ${H}`);  // Chart group translated to the inner area origin
+  const g   = svg.append('g').attr('transform',`translate(${ml},${mt})`);  // Linear x scale from 500 BC to 2026 AD
+  const x   = d3.scaleLinear().domain([MIN_Y, MAX_Y]).range([0, iW]);  // Bar width = the pixel width of one 25-year bin, minus a tiny gap
+  const barW = Math.max(1, x(MIN_Y+BIN)-x(MIN_Y)-0.5);  // Maximum stacked value across all bins (for y domain)
+  const yMax = d3.max(series, s => d3.max(s, d => d[1]));  // y scale: 0 to 5% above the max, inverted so 0 is at the bottom
+  const y    = d3.scaleLinear().domain([0, yMax*1.05]).range([iH, 0]);  // Horizontal grid lines
+  g.append('g').attr('class','grid').call(d3.axisLeft(y).tickSize(-iW).tickFormat('').ticks(5));  // Draw stacked bars for each region series
+  series.forEach(s => {  // One rect per bin in this region's series
+    g.selectAll(`.rb-${s.key}`).data(s).join('rect').attr('class',`rb-${s.key}`)  // x/y position from the stacked values
+      .attr('x', d => x(d.data.year)).attr('y', d => y(d[1]))  // Width is one bin; height is the stacked segment height
+      .attr('width', barW).attr('height', d => Math.max(0, y(d[0])-y(d[1])))  // Fill with region color at 82% opacity
+      .attr('fill', colors[s.key]).attr('fill-opacity', 0.82)  // Mouseover: show a tooltip with bin label, total count, and region breakdown
       .on('mouseover', function(ev,d) {
-        const regionName = REGIONS.find(r => r.key === s.key)?.label || s.key;
-        const binEnd = d.data.year+BIN-1;
+        const regionName = REGIONS.find(r => r.key === s.key)?.label || s.key;  // Format the date range label, handling BC/AD crossover
+        const binEnd = d.data.year+BIN-1;  // Tooltip content: date range, total battles, and region breakdown
         const binLabel = d.data.year<0 ? `${Math.abs(d.data.year)} BC – ${binEnd<0?Math.abs(binEnd)+' BC':binEnd+' AD'}` : `${d.data.year} – ${binEnd} AD`;
         tip.innerHTML=`<div class="tt-name">${binLabel}</div>${ttRow('Total battles',d.data.total)}${ttRow('Region shown',regionName)}${ttRow('In region',d.data[s.key])}`;
-        tip.style.display='block'; moveTip(ev);
-      })
-      .on('mousemove', moveTip).on('mouseout', hideTip);
+        tip.style.display='block'; moveTip(ev);  // Draw vertical annotation lines for key historical turning points
+      })  // Dashed amber line at the annotation year
+      .on('mousemove', moveTip).on('mouseout', hideTip);  // Small label just inside the top of the chart area
   });
-  [{y:-330,label:'Alexander'},{y:1805,label:'Napoleon'},{y:1916,label:'WWI'},{y:1942,label:'WWII'}].forEach(a => {
-    g.append('line').attr('x1',x(a.y)+barW/2).attr('x2',x(a.y)+barW/2).attr('y1',0).attr('y2',iH).attr('stroke','rgba(200,151,58,0.25)').attr('stroke-dasharray','3 3');
+  [{y:-330,label:'Alexander'},{y:1805,label:'Napoleon'},{y:1916,label:'WWI'},{y:1942,label:'WWII'}].forEach(a => {  // Build an embedded legend in the top-right corner of the chart
+    g.append('line').attr('x1',x(a.y)+barW/2).attr('x2',x(a.y)+barW/2).attr('y1',0).attr('y2',iH).attr('stroke','rgba(200,151,58,0.25)').attr('stroke-dasharray','3 3');  // One colored rectangle + label per region
     g.append('text').attr('x',x(a.y)+barW/2+3).attr('y',10).attr('fill','rgba(200,151,58,0.5)').attr('font-family','var(--ffM)').attr('font-size','8px').text(a.label);
   });
   const leg = g.append('g').attr('transform',`translate(${iW-180},2)`);
-  REGIONS.filter(r => r.key !== 'other').forEach((r,i) => {
-    leg.append('rect').attr('x',0).attr('y',i*13).attr('width',8).attr('height',8).attr('fill',r.color);
-    leg.append('text').attr('x',11).attr('y',i*13+7).attr('fill','var(--ink2)').attr('font-family','var(--ffM)').attr('font-size','8px').text(r.label);
+  REGIONS.filter(r => r.key !== 'other').forEach((r,i) => {  // x axis at the bottom of the chart with year labels
+    leg.append('rect').attr('x',0).attr('y',i*13).attr('width',8).attr('height',8).attr('fill',r.color);  // Negative years displayed as 'N BC', positive as 'N AD'
+    leg.append('text').attr('x',11).attr('y',i*13+7).attr('fill','var(--ink2)').attr('font-family','var(--ffM)').attr('font-size','8px').text(r.label);  // y axis on the left with battle count labels
   });
   g.append('g').attr('class','axis').attr('transform',`translate(0,${iH})`).call(d3.axisBottom(x).ticks(12).tickFormat(d => d<0?Math.abs(d)+'BC':d+'AD').tickSize(4));
   g.append('g').attr('class','axis').call(d3.axisLeft(y).ticks(5).tickFormat(d => fmtN(d)));
@@ -1228,21 +1373,21 @@ function buildRhythmChart(battles) {
      1 day → 10 days → 30 days → 90 days → 1 year → 3 years → …
    This produces a proper histogram with readable bars.
 ════════════════════════════════════════════════════════ */
-function buildDurChart(battles) {
+function buildDurChart(battles) {  // buildDurChart(battles): Chapter III histogram of battle durations on a log scale
   // Only keep durations between 1 and 5000 days (filter out data errors)
-  const durs = battles.filter(d => d.dur && d.dur > 0 && d.dur < 5000).map(d => d.dur);
-  const W=400, H=240, mt=14, mr=18, mb=50, ml=52, iW=W-ml-mr, iH=H-mt-mb;
+  const durs = battles.filter(d => d.dur && d.dur > 0 && d.dur < 5000).map(d => d.dur);  // Chart dimensions; slightly smaller than the rhythm chart
+  const W=400, H=240, mt=14, mr=18, mb=50, ml=52, iW=W-ml-mr, iH=H-mt-mb;  // Create the chart group at the margin offset
   const g = d3.select('#c-dur').append('g').attr('transform',`translate(${ml},${mt})`);
 
   // Log scale: 1 day to max duration
-  const xMax = d3.max(durs) || 3650;
-  const x = d3.scaleLog().domain([1, xMax]).range([0, iW]);
+  const xMax = d3.max(durs) || 3650;  // Maximum duration (or 10 years as fallback)
+  const x = d3.scaleLog().domain([1, xMax]).range([0, iW]);  // Log scale range: 1 day to xMax
 
   // FIX: generate explicit log-spaced thresholds so bins spread across the scale.
   // We pick ~14 evenly-spaced positions in log space between 1 and xMax.
-  const logMin = Math.log10(1), logMax = Math.log10(xMax);
-  const nBins  = 14;
-  const logThresholds = d3.range(nBins + 1).map(i => Math.pow(10, logMin + (i / nBins) * (logMax - logMin)));
+  const logMin = Math.log10(1), logMax = Math.log10(xMax);  // Number of bins to create
+  const nBins  = 14;  // 15 threshold values (14 boundaries = 14 bins) spaced linearly in log space
+  const logThresholds = d3.range(nBins + 1).map(i => Math.pow(10, logMin + (i / nBins) * (logMax - logMin)));  // Run d3.bin() with the log-spaced thresholds
 
   const bins = d3.bin().domain([1, xMax]).thresholds(logThresholds)(durs);
   const y = d3.scaleLinear().domain([0, d3.max(bins, d => d.length)]).range([iH, 0]);
@@ -1251,17 +1396,17 @@ function buildDurChart(battles) {
   g.append('g').attr('class','grid').call(d3.axisLeft(y).tickSize(-iW).tickFormat('').ticks(5));
 
   // Draw bars
-  g.selectAll('rect').data(bins).join('rect')
-    .attr('x', d => x(Math.max(d.x0, 1)) + 1)
-    .attr('y', d => y(d.length))
-    .attr('width', d => Math.max(0, x(Math.max(d.x1, 1)) - x(Math.max(d.x0, 1)) - 1))
-    .attr('height', d => Math.max(0, iH - y(d.length)))
+  g.selectAll('rect').data(bins).join('rect')  // y: top of the bar
+    .attr('x', d => x(Math.max(d.x0, 1)) + 1)  // Width: distance between bin edges on the log scale
+    .attr('y', d => y(d.length))  // Height: from bar top to x axis
+    .attr('width', d => Math.max(0, x(Math.max(d.x1, 1)) - x(Math.max(d.x0, 1)) - 1))  // Amber fill, slightly transparent
+    .attr('height', d => Math.max(0, iH - y(d.length)))  // Mouseover: brighten the bar and show a tooltip with the duration range and count
     .attr('fill','#c8973a').attr('fill-opacity', 0.72)
-    .on('mouseover', function(ev, d) {
-      d3.select(this).attr('fill-opacity', 1);
+    .on('mouseover', function(ev, d) {  // Convert day values to human-readable strings (e.g. '7 days', '1.0 yr')
+      d3.select(this).attr('fill-opacity', 1);  // Tooltip: duration range and battle count
       // Show human-readable duration range in tooltip
-      const lo = d.x0 < 365 ? Math.round(d.x0) + ' days' : (d.x0/365).toFixed(1) + ' yrs';
-      const hi = d.x1 < 365 ? Math.round(d.x1) + ' days' : (d.x1/365).toFixed(1) + ' yrs';
+      const lo = d.x0 < 365 ? Math.round(d.x0) + ' days' : (d.x0/365).toFixed(1) + ' yrs';  // Mousemove: reposition tooltip with cursor
+      const hi = d.x1 < 365 ? Math.round(d.x1) + ' days' : (d.x1/365).toFixed(1) + ' yrs';  // Mouseout: restore transparency and hide tooltip
       tip.innerHTML = `<div class="tt-name">${lo} – ${hi}</div>${ttRow('Battles', d.length)}`;
       tip.style.display = 'block';
       moveTip(ev);
@@ -1270,50 +1415,50 @@ function buildDurChart(battles) {
     .on('mouseout', function() { d3.select(this).attr('fill-opacity', 0.72); hideTip(); });
 
   // Median line annotation
-  const med = d3.median(durs);
-  if (med) {
-    g.append('line')
-      .attr('x1', x(med)).attr('x2', x(med)).attr('y1', 0).attr('y2', iH)
+  const med = d3.median(durs);  // Draw a vertical dashed amber line at the median
+  if (med) {  // Vertical extent of the median line
+    g.append('line')  // Small text label just to the right of the median line
+      .attr('x1', x(med)).attr('x2', x(med)).attr('y1', 0).attr('y2', iH)  // Formats the median as days or years depending on magnitude
       .attr('stroke','rgba(200,151,58,0.5)').attr('stroke-dasharray','4 3');
     g.append('text')
       .attr('x', x(med) + 4).attr('y', 16)
       .attr('fill','rgba(200,151,58,0.7)').attr('font-family','var(--ffM)').attr('font-size','9px')
       .text(`med ${med < 365 ? Math.round(med)+'d' : (med/365).toFixed(1)+'yr'}`);
-  }
+  }  // x axis with specific tick values at meaningful durations
 
   // X axis — show representative day/year tick labels
   g.append('g').attr('class','axis').attr('transform',`translate(0,${iH})`)
     .call(d3.axisBottom(x)
       .tickValues([1, 7, 30, 90, 365, 1095, 3650].filter(v => v <= xMax))
       .tickFormat(d => d < 365 ? d+'d' : (d/365).toFixed(0)+'yr')
-      .tickSize(3));
+      .tickSize(3));  // y axis on the left with formatted count labels
 
   // Y axis
   g.append('g').attr('class','axis').call(d3.axisLeft(y).ticks(5).tickFormat(d => fmtN(d)));
 }
 
-function buildWarsChart(battles) {
+function buildWarsChart(battles) {  // buildWarsChart(battles): Chapter III horizontal bar chart of the top 15 wars by battle count
   /* Top 15 wars by documented battle count.
      Wars are taken directly from the `partOfLabel` field in Wikidata —
      no manual curation; whatever conflicts have the most battles in the
      dataset appear here.  The result is dominated by large, well-
-     documented multi-battle conflicts (World Wars, Napoleonic Wars, etc.). */
-  const warCounts = d3.rollup(battles.filter(d=>d.war), v=>v.length, d=>d.war);
-  const topWars = Array.from(warCounts.entries()).sort((a,b)=>b[1]-a[1]).slice(0,15).map(([war,count])=>({war:truncate(war,32),count}));
+     documented multi-battle conflicts (World Wars, Napoleonic Wars, etc.). */  // rollup: counts battles per war, aggregating by the war label
+  const warCounts = d3.rollup(battles.filter(d=>d.war), v=>v.length, d=>d.war);  // topWars: sorted descending, sliced to top 15, with war names truncated to 32 chars
+  const topWars = Array.from(warCounts.entries()).sort((a,b)=>b[1]-a[1]).slice(0,15).map(([war,count])=>({war:truncate(war,32),count}));  // Chart dimensions with extra right margin so count labels don't overflow
   // Increase right margin so value labels (battle counts) don't overflow the border
-  const W=400, H=340, mt=14, mr=40, mb=20, ml=195, iW=W-ml-mr, iH=H-mt-mb;
-  const g = d3.select('#c-wars').append('g').attr('transform',`translate(${ml},${mt})`);
-  const y = d3.scaleBand().domain(topWars.map(d=>d.war)).range([0,iH]).padding(0.25);
-  const x = d3.scaleLinear().domain([0,d3.max(topWars,d=>d.count)*1.08]).range([0,iW]);
-  g.append('g').attr('class','grid').call(d3.axisBottom(x).tickSize(iH).tickFormat('').ticks(4));
-  g.selectAll('rect').data(topWars).join('rect')
-    .attr('y', d=>y(d.war)).attr('x',0).attr('height',y.bandwidth()).attr('width',d=>x(d.count))
-    .attr('fill',(d,i)=>d3.interpolateRgb('#6b4f1e','#c8973a')(i/topWars.length)).attr('fill-opacity',0.85)
-    .on('mouseover', function(ev,d){d3.select(this).attr('fill-opacity',1);tip.innerHTML=`<div class="tt-name">${d.war}</div>${ttRow('Documented battles',d.count)}`;tip.style.display='block';moveTip(ev);})
-    .on('mousemove', moveTip).on('mouseout', function(){d3.select(this).attr('fill-opacity',0.85);hideTip();});
+  const W=400, H=340, mt=14, mr=40, mb=20, ml=195, iW=W-ml-mr, iH=H-mt-mb;  // y: band scale mapping war names to vertical positions
+  const g = d3.select('#c-wars').append('g').attr('transform',`translate(${ml},${mt})`);  // x: linear scale from 0 to 8% above the max count
+  const y = d3.scaleBand().domain(topWars.map(d=>d.war)).range([0,iH]).padding(0.25);  // Faint vertical grid lines
+  const x = d3.scaleLinear().domain([0,d3.max(topWars,d=>d.count)*1.08]).range([0,iW]);  // One rect per war
+  g.append('g').attr('class','grid').call(d3.axisBottom(x).tickSize(iH).tickFormat('').ticks(4));  // y: top of this war's band; x: left-aligned at 0; height: band height; width: proportional to count
+  g.selectAll('rect').data(topWars).join('rect')  // Color gradient from dark amber (#6b4f1e) to bright amber (#c8973a) based on rank
+    .attr('y', d=>y(d.war)).attr('x',0).attr('height',y.bandwidth()).attr('width',d=>x(d.count))  // Mouseover: brighten bar and show tooltip with full war name and count
+    .attr('fill',(d,i)=>d3.interpolateRgb('#6b4f1e','#c8973a')(i/topWars.length)).attr('fill-opacity',0.85)  // Re-render on mouseout
+    .on('mouseover', function(ev,d){d3.select(this).attr('fill-opacity',1);tip.innerHTML=`<div class="tt-name">${d.war}</div>${ttRow('Documented battles',d.count)}`;tip.style.display='block';moveTip(ev);})  // Count labels clamped to stay inside the chart border
+    .on('mousemove', moveTip).on('mouseout', function(){d3.select(this).attr('fill-opacity',0.85);hideTip();});  // Position label at (x: bar end capped at iW-2, y: band center)
   // Clamp label x so it never overflows the card's right border
-  g.selectAll('.vl').data(topWars).join('text').attr('class','vl')
-    .attr('x',d=>Math.min(x(d.count)+4, iW-2)).attr('y',d=>y(d.war)+y.bandwidth()/2+3.5)
+  g.selectAll('.vl').data(topWars).join('text').attr('class','vl')  // Left axis: war names with slightly reduced font to fit 32-char labels
+    .attr('x',d=>Math.min(x(d.count)+4, iW-2)).attr('y',d=>y(d.war)+y.bandwidth()/2+3.5)  // Bottom axis: battle count with 4 ticks and formatted numbers
     .attr('fill','var(--ink2)').attr('font-family','var(--ffM)').attr('font-size','8px').text(d=>d.count);
   g.append('g').attr('class','axis').call(d3.axisLeft(y).tickSize(0)).selectAll('text').attr('dx','-4px').style('font-size','7.5px');
   g.append('g').attr('class','axis').attr('transform',`translate(0,${iH})`).call(d3.axisBottom(x).ticks(4).tickSize(3).tickFormat(d=>fmtN(d)));
@@ -1323,72 +1468,72 @@ function buildWarsChart(battles) {
    When a user clicks a stream ribbon (or legend entry), this
    function draws a dot-column timeline for that specific war.
 ════════════════════════════════════════════════════════ */
-function showWarDetail(war, warBattles, warColor) {
-  const panel = document.getElementById('war-detail');
+function showWarDetail(war, warBattles, warColor) {  // showWarDetail(war, warBattles, warColor): draws the per-war dot timeline in the detail panel
+  const panel = document.getElementById('war-detail');  // Get references to the war detail panel and its child elements
   const title = document.getElementById('war-detail-title');
   const svg   = d3.select('#war-detail-svg');
 
-  title.textContent = war;
-  panel.classList.add('visible');
+  title.textContent = war;  // Make the panel visible by adding the 'visible' class (CSS: display:flex)
+  panel.classList.add('visible');  // Clear any previously drawn timeline
   svg.selectAll('*').remove();
 
-  if (!warBattles.length) {
+  if (!warBattles.length) {  // Centered message text
     svg.append('text').attr('x',480).attr('y',170)
       .attr('text-anchor','middle').attr('fill','var(--ink2)')
       .attr('font-family','var(--ffM)').attr('font-size','11px')
       .text('No battles found for this conflict.');
-    return;
+    return;  // Sort battles chronologically for correct left-to-right layout
   }
 
-  warBattles.sort((a,b) => a.year - b.year);
+  warBattles.sort((a,b) => a.year - b.year);  // Chart dimensions with margins
 
-  const W=960, H=340, mt=38, mr=30, mb=52, ml=50;
+  const W=960, H=340, mt=38, mr=30, mb=52, ml=50;  // Chart group translated to the inner area origin
   const iW=W-ml-mr, iH=H-mt-mb;
-  const g = svg.append('g').attr('transform',`translate(${ml},${mt})`);
+  const g = svg.append('g').attr('transform',`translate(${ml},${mt})`);  // Extract years; find the year range
 
-  const years = warBattles.map(d => d.year);
-  const yMin = d3.min(years), yMax = d3.max(years);
+  const years = warBattles.map(d => d.year);  // Add padding around the year range (6% of span, min 2 years) for visual breathing room
+  const yMin = d3.min(years), yMax = d3.max(years);  // x: linear scale from padded min to padded max year
   const xPad = Math.max(2, Math.round((yMax - yMin) * 0.06));
-  const x = d3.scaleLinear().domain([yMin-xPad, yMax+xPad]).range([0, iW]);
+  const x = d3.scaleLinear().domain([yMin-xPad, yMax+xPad]).range([0, iW]);  // DOT_R: dot radius in SVG units
 
-  const DOT_R   = 3.5;
-  const DOT_STEP = DOT_R*2 + 1.5;
+  const DOT_R   = 3.5;  // MAX_COL: maximum dots per year column before truncating (78% of available height / step size)
+  const DOT_STEP = DOT_R*2 + 1.5;  // CY: vertical center of the chart — dots stack symmetrically above and below
   const MAX_COL  = Math.floor(iH * 0.78 / DOT_STEP); // Max dots per year column
   const CY = iH / 2; // Vertical center for column stacking
 
   // Group by year
-  const byYear = d3.group(warBattles, d => d.year);
+  const byYear = d3.group(warBattles, d => d.year);  // Draw a dashed horizontal reference line at the vertical center
 
   // Horizontal center-line for visual reference
   g.append('line').attr('x1',0).attr('x2',iW).attr('y1',CY).attr('y2',CY)
-    .attr('stroke','var(--ink3)').attr('stroke-dasharray','3 3');
+    .attr('stroke','var(--ink3)').attr('stroke-dasharray','3 3');  // Render each year's column of dots
 
   // Draw each year column
   byYear.forEach((grp, yr) => {
     const n     = grp.length;
-    const shown = Math.min(n, MAX_COL);
-    const cx    = x(yr);
+    const shown = Math.min(n, MAX_COL);  // Each dot in the column: position symmetrically around CY
+    const cx    = x(yr);  // py: vertical offset — (i - center_index) × step
 
     // Stack dots symmetrically above and below center
     grp.slice(0, shown).forEach((b, i) => {
       const py = CY + (i - (shown-1)/2) * DOT_STEP;
       g.append('circle')
-        .attr('cx', cx).attr('cy', py).attr('r', DOT_R)
+        .attr('cx', cx).attr('cy', py).attr('r', DOT_R)  // Bind tooltip events to each dot
         .attr('fill', warColor).attr('fill-opacity', 0.8)
         .attr('stroke', warColor).attr('stroke-width', 0.8).attr('stroke-opacity', 0.35)
         .attr('class', 'bdot')
         .on('mouseover', (ev,_) => showTip(ev, b))
-        .on('mousemove', moveTip).on('mouseout', hideTip);
-    });
+        .on('mousemove', moveTip).on('mouseout', hideTip);  // If column exceeds MAX_COL, show a '+N' overflow label above the stack
+    });  // y position just above the top dot
 
     // If column is capped, show overflow count above it
     if (n > MAX_COL) {
       const topY = CY - (shown-1)/2 * DOT_STEP - DOT_R - 8;
       g.append('text').attr('x', cx).attr('y', topY)
         .attr('text-anchor','middle').attr('fill','var(--amber)')
-        .attr('font-family','var(--ffM)').attr('font-size','7px')
-        .text(`+${n-MAX_COL}`);
-    }
+        .attr('font-family','var(--ffM)').attr('font-size','7px')  // If more than one battle in this year, show the count above the column
+        .text(`+${n-MAX_COL}`);  // y position: above overflow label if present, or just above the top dot
+    }  // Small muted count label
 
     // Show per-year count label above each column with more than one battle
     if (n > 1) {
@@ -1397,9 +1542,9 @@ function showWarDetail(war, warBattles, warColor) {
       g.append('text').attr('x', cx).attr('y', labelY)
         .attr('text-anchor','middle').attr('fill','var(--ink3)')
         .attr('font-family','var(--ffM)').attr('font-size','6.5px')
-        .text(n);
-    }
-  });
+        .text(n);  // Summary stats bar above the timeline: total battles, date range, years active
+    }  // Position the stats group at the top of the SVG (above the chart area)
+  });  // Three stats: total battles, date range, years active
 
   // Summary stats
   const statG = svg.append('g').attr('transform',`translate(${ml},13)`);
@@ -1408,9 +1553,9 @@ function showWarDetail(war, warBattles, warColor) {
     { label:'Date range',    val: `${fmtYear(yMin)} – ${fmtYear(yMax)}` },
     { label:'Years active',  val: yMax-yMin <= 0 ? '< 1' : String(yMax-yMin+1) },
   ].forEach((s, i) => {
-    statG.append('text').attr('x', i*210).attr('y', 0)
-      .attr('fill', warColor).attr('font-family','var(--ffD)').attr('font-size','13px')
-      .text(typeof s.val === 'number' ? s.val.toLocaleString() : s.val);
+    statG.append('text').attr('x', i*210).attr('y', 0)  // X axis at the bottom of the war detail timeline
+      .attr('fill', warColor).attr('font-family','var(--ffD)').attr('font-size','13px')  // Limit tick count to the actual year span to avoid crowding
+      .text(typeof s.val === 'number' ? s.val.toLocaleString() : s.val);  // Format negative years as 'BC', positive as 'AD'
     statG.append('text').attr('x', i*210).attr('y', 13)
       .attr('fill','var(--ink3)').attr('font-family','var(--ffM)').attr('font-size','7.5px')
       .attr('letter-spacing','0.1em').text(s.label.toUpperCase());
@@ -1432,116 +1577,116 @@ function showWarDetail(war, warBattles, warColor) {
    conflicts by total documented battle count, restricted to
    battles dated between 1000 AD and 2026.
 ════════════════════════════════════════════════════════ */
-function buildSankeyStream(battles) {
-  const STREAM_MIN=1000, STREAM_MAX=2026, STEP=10, TOP_N=14;
+function buildSankeyStream(battles) {  // buildSankeyStream(battles): Chapter IV stream graph of the top 14 wars by battle count
+  const STREAM_MIN=1000, STREAM_MAX=2026, STEP=10, TOP_N=14;  // Constants: restrict to 1000 AD–2026, 10-year bins, top 14 wars
 
-  const withWar = battles.filter(d => d.war && d.year >= STREAM_MIN && d.year <= STREAM_MAX);
-  const warCounts = d3.rollup(withWar, v=>v.length, d=>d.war);
+  const withWar = battles.filter(d => d.war && d.year >= STREAM_MIN && d.year <= STREAM_MAX);  // Count battles per war to identify the top N
+  const warCounts = d3.rollup(withWar, v=>v.length, d=>d.war);  // topWars: array of war name strings in descending battle count order
   const topWars = Array.from(warCounts.entries()).sort((a,b)=>b[1]-a[1]).slice(0,TOP_N).map(([war])=>war);
 
-  const warDecadeMap = new Map();
-  withWar.forEach(d => {
-    if (!topWars.includes(d.war)) return;
-    const decade = Math.floor(d.year/STEP)*STEP;
+  const warDecadeMap = new Map();  // For each battle in the top-N wars:
+  withWar.forEach(d => {  // Skip battles whose war isn't in the top N
+    if (!topWars.includes(d.war)) return;  // Floor to the nearest decade
+    const decade = Math.floor(d.year/STEP)*STEP;  // Increment the (war, decade) bucket
     const key = `${d.war}||${decade}`;
     warDecadeMap.set(key, (warDecadeMap.get(key)||0)+1);
   });
 
-  const decades = d3.range(STREAM_MIN, STREAM_MAX+STEP, STEP);
-  const binData = decades.map(decade => {
-    const obj = { decade };
+  const decades = d3.range(STREAM_MIN, STREAM_MAX+STEP, STEP);  // Convert to dense bin objects: one row per decade, one column per war
+  const binData = decades.map(decade => {  // Initialize the decade object
+    const obj = { decade };  // Look up the count from the sparse map (default 0)
     topWars.forEach(war => { obj[war] = warDecadeMap.get(`${war}||${decade}`) || 0; });
     return obj;
-  });
+  });  // d3.stack with wiggle offset: auto-centers the streams (silhouette chart style)
 
   const stack = d3.stack().keys(topWars).offset(d3.stackOffsetWiggle).order(d3.stackOrderInsideOut);
-  const series = stack(binData);
+  const series = stack(binData);  // SVG dimensions with small margins
 
-  const W=960, H=420, mt=18, mr=18, mb=42, ml=18;
+  const W=960, H=420, mt=18, mr=18, mb=42, ml=18;  // Select the sankey SVG and set its viewBox
   const iW=W-ml-mr, iH=H-mt-mb;
-  const svg = d3.select('#sankey-svg').attr('viewBox',`0 0 ${W} ${H}`);
+  const svg = d3.select('#sankey-svg').attr('viewBox',`0 0 ${W} ${H}`);  // ClipPath to contain ribbons within the viewBox
 
-  svg.append('defs').append('clipPath').attr('id','sankey-clip')
-    .append('rect').attr('width',W).attr('height',H);
+  svg.append('defs').append('clipPath').attr('id','sankey-clip')  // Clipped group for the stream paths
+    .append('rect').attr('width',W).attr('height',H);  // Translated inner chart group
   const streamG = svg.append('g').attr('clip-path','url(#sankey-clip)');
-  const g = streamG.append('g').attr('transform',`translate(${ml},${mt})`);
+  const g = streamG.append('g').attr('transform',`translate(${ml},${mt})`);  // x scale: linear from STREAM_MIN to STREAM_MAX
 
-  const x = d3.scaleLinear().domain([STREAM_MIN, STREAM_MAX]).range([0, iW]);
+  const x = d3.scaleLinear().domain([STREAM_MIN, STREAM_MAX]).range([0, iW]);  // y scale: maps stack values to SVG y coordinates
   const yMin = d3.min(series, s=>d3.min(s,d=>d[0]));
-  const yMax = d3.max(series, s=>d3.max(s,d=>d[1]));
+  const yMax = d3.max(series, s=>d3.max(s,d=>d[1]));  // 14-color palette (one per war ribbon), cycling if needed
   const y = d3.scaleLinear().domain([yMin, yMax]).range([iH, 0]);
 
   const palette = [
     '#c8973a','#9b2335','#4e7fa8','#5a8a5a','#7a5a9a','#8a6a30',
-    '#4a7a5a','#6b4f1e','#3a5a8a','#9a4a35','#3a8a5a','#7a3a9a',
+    '#4a7a5a','#6b4f1e','#3a5a8a','#9a4a35','#3a8a5a','#7a3a9a',  // warColor(war): maps a war name to its palette color by index
     '#4a6a9a','#8a4a6a',
   ];
-  const warColor = war => palette[topWars.indexOf(war) % palette.length];
+  const warColor = war => palette[topWars.indexOf(war) % palette.length];  // d3.area() generator: maps stacked [y0, y1] values to SVG coordinates via Basis curve
 
-  const area = d3.area()
+  const area = d3.area()  // Basis curve gives smooth organic ribbons
     .x(d => x(d.data.decade)).y0(d => y(d[0])).y1(d => y(d[1]))
-    .curve(d3.curveBasis);
+    .curve(d3.curveBasis);  // Draw one path per war series
 
-  series.forEach(s => {
+  series.forEach(s => {  // Render the area path with fill and subtle stroke
     const war = s.key, color = warColor(war);
     g.append('path')
-      .datum(s).attr('class','stream-path').attr('data-war', war)
+      .datum(s).attr('class','stream-path').attr('data-war', war)  // Cursor signals the ribbon is clickable
       .attr('d', area).attr('fill', color).attr('fill-opacity', 0.72)
-      .attr('stroke', color).attr('stroke-opacity', 0.2).attr('stroke-width', 0.5)
-      .style('cursor','pointer')
-      .on('mouseover', function(ev) {
-        d3.selectAll('.stream-path').attr('fill-opacity', 0.12).attr('stroke-opacity',0.05);
+      .attr('stroke', color).attr('stroke-opacity', 0.2).attr('stroke-width', 0.5)  // Mouseover: dim all other ribbons and highlight this one; show tooltip
+      .style('cursor','pointer')  // Bring this ribbon to full opacity
+      .on('mouseover', function(ev) {  // Compute summary stats for the tooltip
+        d3.selectAll('.stream-path').attr('fill-opacity', 0.12).attr('stroke-opacity',0.05);  // Tooltip: war name, total battles, active period, distinct decades
         d3.select(this).attr('fill-opacity', 0.92).attr('stroke-opacity', 0.5);
         const total=warCounts.get(war);
-        const batts=withWar.filter(d=>d.war===war);
+        const batts=withWar.filter(d=>d.war===war);  // Show and position the tooltip
         const minY=d3.min(batts,d=>d.year), maxY=d3.max(batts,d=>d.year);
-        tip.innerHTML=`<div class="tt-name">${truncate(war,45)}</div>${ttRow('Documented battles',total)}${ttRow('Active period',fmtYear(minY)+' – '+fmtYear(maxY))}${ttRow('Decades with battles',new Set(batts.map(d=>Math.floor(d.year/10)*10)).size)}<span class="tt-wiki" style="cursor:default;">Click ribbon to expand →</span>`;
-        tip.style.display='block'; moveTip(ev);
-      })
+        tip.innerHTML=`<div class="tt-name">${truncate(war,45)}</div>${ttRow('Documented battles',total)}${ttRow('Active period',fmtYear(minY)+' – '+fmtYear(maxY))}${ttRow('Decades with battles',new Set(batts.map(d=>Math.floor(d.year/10)*10)).size)}<span class="tt-wiki" style="cursor:default;">Click ribbon to expand →</span>`;  // Mousemove: follow cursor
+        tip.style.display='block'; moveTip(ev);  // Mouseout: restore all ribbons to default opacity
+      })  // Click: drill into the war detail panel
       .on('mousemove', moveTip)
       .on('mouseout', function() { d3.selectAll('.stream-path').attr('fill-opacity',0.72).attr('stroke-opacity',0.2); hideTip(); })
-      .on('click', function() { hideTip(); showWarDetail(war, battles.filter(d=>d.war===war), warColor(war)); });
-  });
+      .on('click', function() { hideTip(); showWarDetail(war, battles.filter(d=>d.war===war), warColor(war)); });  // Label placement with 2D bounding-box collision detection
+  });  // placed: list of already-placed label bounding boxes
 
   /* Label placement — 2D bounding-box collision detection.
      Each placed label stores its center (lx,ly) and half-dimensions (hw,hh).
      A new label is skipped if it overlaps any already-placed box.
      This handles the common case of two wars peaking at nearby years
-     but different heights — both can be labelled without collision. */
-  const placed = []; // { lx, ly, hw, hh }
+     but different heights — both can be labelled without collision. */  // For each series, find the decade where the ribbon is tallest (peak height)
+  const placed = []; // { lx, ly, hw, hh }  // maxH: tallest pixel height seen; peakDec: the decade where it occurred
 
-  series.forEach(s => {
+  series.forEach(s => {  // Skip labels for very short ribbons (less than 12px tall at peak)
     const war = s.key, color = warColor(war);
     let maxH=-Infinity, peakDec=STREAM_MIN;
-    s.forEach(d => { const h=y(d[0])-y(d[1]); if(h>maxH){maxH=h;peakDec=d.data.decade;} });
-    if (maxH < 12) return;
+    s.forEach(d => { const h=y(d[0])-y(d[1]); if(h>maxH){maxH=h;peakDec=d.data.decade;} });  // pe: the data point at the peak decade
+    if (maxH < 12) return;  // Skip if no data point found at that decade
 
-    const pe = s.find(d => d.data.decade === peakDec);
-    if (!pe) return;
-    const lx = x(peakDec+STEP/2);
-    const ly = y((pe[0]+pe[1])/2);
+    const pe = s.find(d => d.data.decade === peakDec);  // ly: y position (vertical center of the ribbon at peak)
+    if (!pe) return;  // Truncate war name to 16 chars for compact label
+    const lx = x(peakDec+STEP/2);  // Estimate half-width from character count × 4.5 + 8 pixels
+    const ly = y((pe[0]+pe[1])/2);  // Fixed half-height of the label bounding box
     const label = truncate(war, 16);
     const hw = (label.length*4.5+8)/2;   // half-width of label box
-    const hh = 5;                          // half-height of label box
+    const hh = 5;                          // half-height of label box  // Check if this label overlaps any already-placed label (2D AABB test)
 
     // Check 2D overlap with any placed label
-    const collision = placed.some(p =>
-      Math.abs(p.lx-lx) < p.hw+hw+4 && Math.abs(p.ly-ly) < p.hh+hh+3
+    const collision = placed.some(p =>  // If overlap detected, skip this label entirely
+      Math.abs(p.lx-lx) < p.hw+hw+4 && Math.abs(p.ly-ly) < p.hh+hh+3  // Register this label's bounding box for future overlap checks
     );
-    if (collision) return;
+    if (collision) return;  // Semi-transparent dark rect behind the label for legibility
     placed.push({ lx, ly, hw, hh });
 
     g.append('rect')
-      .attr('x', lx-hw).attr('y', ly-hh-3)
+      .attr('x', lx-hw).attr('y', ly-hh-3)  // White label text centered over the ribbon peak
       .attr('width', hw*2).attr('height', hh*2+2)
       .attr('fill','rgba(8,10,15,0.65)').attr('rx',2).attr('pointer-events','none');
     g.append('text')
-      .attr('x', lx).attr('y', ly+3)
+      .attr('x', lx).attr('y', ly+3)  // non-interactive so hover/click fall through to the ribbon path underneath
       .attr('text-anchor','middle').attr('dominant-baseline','middle')
       .attr('fill','#fff').attr('fill-opacity',0.9)
       .attr('font-family','var(--ffM)').attr('font-size','7px').attr('letter-spacing','0.04em')
-      .attr('pointer-events','none').text(label);
-  });
+      .attr('pointer-events','none').text(label);  // Era boundary vertical lines across the stream diagram
+  });  // Dashed era-colored line at the era's start year
 
   // Era boundary lines
   ERAS.filter(e => e.min >= STREAM_MIN).forEach(e => {
@@ -1549,7 +1694,7 @@ function buildSankeyStream(battles) {
       .attr('stroke',e.color).attr('stroke-opacity',0.12).attr('stroke-width',1).attr('stroke-dasharray','3 4');
     g.append('text').attr('x',x(e.min)+3).attr('y',12)
       .attr('fill',e.color).attr('fill-opacity',0.35).attr('font-family','var(--ffM)').attr('font-size','7px').text(e.label);
-  });
+  });  // X axis at the bottom of the stream SVG
 
   // X axis
   const axisG = svg.append('g').attr('class','axis').attr('transform',`translate(${ml},${mt+iH})`);
@@ -1560,31 +1705,31 @@ function buildSankeyStream(battles) {
   // (to avoid fighting page scroll), but here on the Sankey we explicitly
   // ALLOW wheel-zoom because the diagram is wide and benefits from it.
   // Users who want to page-scroll past the diagram can use the scrollbar.
-  const levelEl = document.getElementById('sk-level');
-  const skZoom = d3.zoom().scaleExtent([1,20])
+  const levelEl = document.getElementById('sk-level');  // Rescale the x axis to reflect the zoomed domain
+  const skZoom = d3.zoom().scaleExtent([1,20])  // Update axis with the rescaled x
     // Allow wheel zoom on the Sankey — do not filter it out
     .on('zoom', ev => {
-      g.attr('transform',`translate(${ml+ev.transform.x},${mt}) scale(${ev.transform.k},1)`);
-      const newX = ev.transform.rescaleX(x);
-      axisG.call(d3.axisBottom(newX).ticks(10).tickFormat(d => d<0?Math.abs(d)+'BC':String(d)).tickSize(4));
+      g.attr('transform',`translate(${ml+ev.transform.x},${mt}) scale(${ev.transform.k},1)`);  // Attach the zoom to the SVG
+      const newX = ev.transform.rescaleX(x);  // +/- zoom buttons
+      axisG.call(d3.axisBottom(newX).ticks(10).tickFormat(d => d<0?Math.abs(d)+'BC':String(d)).tickSize(4));  // Reset zoom button
       if (levelEl) levelEl.textContent = ev.transform.k.toFixed(1)+'×';
     });
   svg.call(skZoom);
-  document.getElementById('sk-in') ?.addEventListener('click', () => svg.transition().duration(320).call(skZoom.scaleBy,2));
-  document.getElementById('sk-out')?.addEventListener('click', () => svg.transition().duration(320).call(skZoom.scaleBy,0.5));
-  document.getElementById('sk-rst')?.addEventListener('click', () => svg.transition().duration(420).call(skZoom.transform, d3.zoomIdentity));
+  document.getElementById('sk-in') ?.addEventListener('click', () => svg.transition().duration(320).call(skZoom.scaleBy,2));  // Build the war legend below the stream diagram
+  document.getElementById('sk-out')?.addEventListener('click', () => svg.transition().duration(320).call(skZoom.scaleBy,0.5));  // One div per war in topWars
+  document.getElementById('sk-rst')?.addEventListener('click', () => svg.transition().duration(420).call(skZoom.transform, d3.zoomIdentity));  // Swatch colored rectangle + truncated war name
 
   // Legend
-  const legEl = document.getElementById('sankey-legend');
-  topWars.forEach(war => {
-    const item = document.createElement('div');
-    item.className = 'sleg-item';
-    item.innerHTML = `<div class="sleg-swatch" style="background:${warColor(war)}"></div><span>${truncate(war,24)}</span>`;
+  const legEl = document.getElementById('sankey-legend');  // Dim all ribbons
+  topWars.forEach(war => {  // Highlight the ribbon matching this war (CSS.escape handles special chars in the war name)
+    const item = document.createElement('div');  // Mouseleave: restore all ribbons
+    item.className = 'sleg-item';  // Click: open the war detail panel for this war
+    item.innerHTML = `<div class="sleg-swatch" style="background:${warColor(war)}"></div><span>${truncate(war,24)}</span>`;  // Append the legend item to the legend container
     item.title = war;
     item.addEventListener('mouseenter', () => {
-      d3.selectAll('.stream-path').attr('fill-opacity',0.12);
-      d3.selectAll(`.stream-path[data-war="${CSS.escape(war)}"]`).attr('fill-opacity',0.92);
-    });
+      d3.selectAll('.stream-path').attr('fill-opacity',0.12);  // Back button in the war detail panel: hides the panel and restores all ribbons
+      d3.selectAll(`.stream-path[data-war="${CSS.escape(war)}"]`).attr('fill-opacity',0.92);  // Remove 'visible' class to hide the panel (CSS: display:none)
+    });  // Restore all ribbons to default opacity
     item.addEventListener('mouseleave', () => { d3.selectAll('.stream-path').attr('fill-opacity',0.72); });
     item.addEventListener('click', () => { showWarDetail(war, battles.filter(d=>d.war===war), warColor(war)); });
     legEl.appendChild(item);
@@ -1616,7 +1761,7 @@ function buildSankeyStream(battles) {
      data/belligerents.csv   — attacker/defender info keyed by isqno
      data/battle_durations.csv — start/end datetimes keyed by isqno
    All three are joined by the `isqno` field (battle sequence number).
-════════════════════════════════════════════════════════ */
+════════════════════════════════════════════════════════ */  // CDB90_GEO: lookup table mapping CDB90 location name strings to approximate [lat, lon] centroids
 const CDB90_GEO = {
   'ALABAMA':[32.8,-86.8],'ANHALT':[51.8,11.5],'AUSTRIA':[47.5,14.5],
   'AUSTRIA AND ITALY':[47.0,13.0],'AUSTRIAN GALICIA':[49.5,22.0],
@@ -1655,43 +1800,43 @@ const CDB90_GEO = {
   'ZULULAND':[-28.0,31.5],
 };
 
-const CDB90_ERAS = [
-  { key:'early',      label:'1600s',       color:'#8a7040', min:1600, max:1699 },
-  { key:'c18',        label:'1700–1789',   color:'#4a7a5a', min:1700, max:1789 },
-  { key:'napoleon',   label:'Napoleonic',  color:'#c8973a', min:1790, max:1815 },
-  { key:'industrial', label:'Industrial',  color:'#7a5a9a', min:1816, max:1913 },
-  { key:'ww1',        label:'WWI',         color:'#9b2335', min:1914, max:1918 },
-  { key:'ww2',        label:'WWII',        color:'#4e7fa8', min:1939, max:1945 },
+const CDB90_ERAS = [  // 1600s — early modern period
+  { key:'early',      label:'1600s',       color:'#8a7040', min:1600, max:1699 },  // 1700–1789 — age of reason and colonial expansion
+  { key:'c18',        label:'1700–1789',   color:'#4a7a5a', min:1700, max:1789 },  // Napoleonic era — 1790 to 1815
+  { key:'napoleon',   label:'Napoleonic',  color:'#c8973a', min:1790, max:1815 },  // Industrial era — 1816 to 1913
+  { key:'industrial', label:'Industrial',  color:'#7a5a9a', min:1816, max:1913 },  // World War I — 1914 to 1918
+  { key:'ww1',        label:'WWI',         color:'#9b2335', min:1914, max:1918 },  // World War II — 1939 to 1945
+  { key:'ww2',        label:'WWII',        color:'#4e7fa8', min:1939, max:1945 },  // Cold War — 1946 to 1973
   { key:'coldwar',    label:'Cold War',    color:'#5a8a5a', min:1946, max:1973 },
-];
+];  // cdb90EraFor(y): maps a year to a CDB90 era, defaulting to Industrial if no match
 function cdb90EraFor(y) { return CDB90_ERAS.find(e => y >= e.min && y <= e.max) || CDB90_ERAS[3]; }
 
 const CDB90_PATHS = { battles:'data/battles.csv', belligerents:'data/belligerents.csv', durations:'data/battle_durations.csv' };
 
-async function loadCDB90() {
-  const [rawB, rawBe, rawD] = await Promise.all([
-    d3.csv(CDB90_PATHS.battles),
-    d3.csv(CDB90_PATHS.belligerents),
+async function loadCDB90() {  // Fetch all three CSVs simultaneously using Promise.all
+  const [rawB, rawBe, rawD] = await Promise.all([  // battles.csv: core battle metadata
+    d3.csv(CDB90_PATHS.battles),  // belligerents.csv: attacker/defender information keyed by isqno
+    d3.csv(CDB90_PATHS.belligerents),  // battle_durations.csv: start/end datetimes keyed by isqno
     d3.csv(CDB90_PATHS.durations),
-  ]);
-  const beMap = {};
-  for (const r of rawBe) { if (!beMap[r.isqno]) beMap[r.isqno]={}; beMap[r.isqno][r.attacker==='1'?'att':'def']=r; }
-  const dMap = {};
-  for (const r of rawD) dMap[r.isqno]=r;
+  ]);  // Build belligerent lookup: isqno → { att, def } from rawBe rows
+  const beMap = {};  // Group rows by isqno; mark attacker (att) vs defender (def) based on the 'attacker' field
+  for (const r of rawBe) { if (!beMap[r.isqno]) beMap[r.isqno]={}; beMap[r.isqno][r.attacker==='1'?'att':'def']=r; }  // Build duration lookup: isqno → duration row
+  const dMap = {};  // Accumulate valid battle objects
+  for (const r of rawD) dMap[r.isqno]=r;  // idx: sequential index used for deterministic jitter calculation
   const battles = [];
-  let idx=0;
-  for (const b of rawB) {
-    const dur=dMap[b.isqno]||{}, be=beMap[b.isqno]||{}, att=be.att||{}, def=be.def||{};
-    const dt=dur.datetime||'';
-    const year=dt ? +dt.slice(0,4) : null;
-    if (!year||year<1500) continue;
-    const coords=CDB90_GEO[b.locn]; if (!coords) continue;
-    const era=cdb90EraFor(year);
-    const h=(idx*2654435761)>>>0;
+  let idx=0;  // For each battle row: merge duration, belligerent, and geo data
+  for (const b of rawB) {  // Extract year from the datetime field (first 4 characters)
+    const dur=dMap[b.isqno]||{}, be=beMap[b.isqno]||{}, att=be.att||{}, def=be.def||{};  // Skip battles with no year or pre-1500 dates
+    const dt=dur.datetime||'';  // Look up the geographic centroid for this location string; skip if not in our lookup
+    const year=dt ? +dt.slice(0,4) : null;  // Find the CDB90 era for this year
+    if (!year||year<1500) continue;  // Deterministic hash from the battle index (hash = (idx × large_prime) mod 2^32)
+    const coords=CDB90_GEO[b.locn]; if (!coords) continue;  // jx: horizontal jitter derived from low 16 bits of the hash, ±3.5 SVG units
+    const era=cdb90EraFor(year);  // jy: vertical jitter derived from high 16 bits of the hash, ±3.5 SVG units
+    const h=(idx*2654435761)>>>0;  // Push the assembled battle object including jitter offsets
     const jx=((h&0xFFFF)/0xFFFF-0.5)*7;
     const jy=(((h>>16)&0xFFFF)/0xFFFF-0.5)*7;
     battles.push({ isqno:b.isqno, name:b.name, war:b.war, locn:b.locn, year, lat:coords[0], lon:coords[1], era, jx, jy, i:idx });
-    idx++;
+    idx++;  // buildCDB90Map(world, processed): draws the CDB90 battle map and regional bar chart
   }
   return battles;
 }
@@ -1705,44 +1850,44 @@ function buildCDB90Map(world, processed) {
      found at their expected paths:
        data/battles.csv
        data/belligerents.csv
-       data/battle_durations.csv
+       data/battle_durations.csv  // Reveal the CDB90 section wrapper (hidden by default in CSS)
   */
   // Reveal the CDB90 section now that we confirmed data loaded
-  const wrapper = document.getElementById('cdb90-wrapper');
-  wrapper.style.display = 'block';
+  const wrapper = document.getElementById('cdb90-wrapper');  // Set display:block to show the wrapper div
+  wrapper.style.display = 'block';  // SVG viewBox dimensions
 
-  const W=960, H=480;
-  const svg  = d3.select('#cdb90-svg').attr('viewBox',`0 0 ${W} ${H}`);
-  const proj = makeProj(W, H);
-  svg.append('defs').append('clipPath').attr('id','cdb90-clip').append('rect').attr('width',W).attr('height',H);
-  const mapG = svg.append('g').attr('clip-path','url(#cdb90-clip)');
-  drawBase(mapG, world, proj);
-  const layer = mapG.append('g');
-  let curFilter='all', curK=1;
+  const W=960, H=480;  // Create Natural Earth projection
+  const svg  = d3.select('#cdb90-svg').attr('viewBox',`0 0 ${W} ${H}`);  // ClipPath for the map
+  const proj = makeProj(W, H);  // Clip rect matching the full viewBox
+  svg.append('defs').append('clipPath').attr('id','cdb90-clip').append('rect').attr('width',W).attr('height',H);  // Clipped map group
+  const mapG = svg.append('g').attr('clip-path','url(#cdb90-clip)');  // Draw base map layers
+  drawBase(mapG, world, proj);  // Dot layer group
+  const layer = mapG.append('g');  // curFilter: currently active era filter; curK: current zoom level
+  let curFilter='all', curK=1;  // d3.zoom for the CDB90 map — allows up to 18× zoom
 
-  const zoom = d3.zoom().scaleExtent([1,18])
+  const zoom = d3.zoom().scaleExtent([1,18])  // Apply the transform to the map group
     // Allow wheel zoom so users can scroll into specific regions
     .on('zoom', ev => {
       curK=ev.transform.k;
-      mapG.attr('transform',ev.transform);
+      mapG.attr('transform',ev.transform);  // Attach zoom to the CDB90 SVG
       layer.selectAll('.cdot').attr('r', 1/Math.sqrt(curK)*4.5);
     });
-  svg.call(zoom);
+  svg.call(zoom);  // render(): draws the dots for the current era filter
 
-  function render() {
-    const data = curFilter==='all' ? processed : processed.filter(d=>d.era.key===curFilter);
-    document.getElementById('cdb90-tally-n').textContent=data.length;
-    layer.selectAll('.cdot').data(data,d=>d.i).join(
-      en => en.append('circle').attr('class','bdot cdot')
+  function render() {  // Update the count display in the filter row
+    const data = curFilter==='all' ? processed : processed.filter(d=>d.era.key===curFilter);  // Data-join: enter new dots, update existing, exit removed
+    document.getElementById('cdb90-tally-n').textContent=data.length;  // cx/cy: projected position + the deterministic jitter offset
+    layer.selectAll('.cdot').data(data,d=>d.i).join(  // Animate from r=0 to the scaled radius on enter
+      en => en.append('circle').attr('class','bdot cdot')  // Fill and stroke with the era color
         .attr('cx',d=>proj([d.lon,d.lat])[0]+d.jx).attr('cy',d=>proj([d.lon,d.lat])[1]+d.jy)
-        .attr('r',0).attr('fill',d=>d.era.color).attr('fill-opacity',0.82)
-        .attr('stroke',d=>d.era.color).attr('stroke-width',0.8).attr('stroke-opacity',0.3)
+        .attr('r',0).attr('fill',d=>d.era.color).attr('fill-opacity',0.82)  // Mouseover: show a tooltip with battle name, war, year, location, era, and Wikipedia search link
+        .attr('stroke',d=>d.era.color).attr('stroke-width',0.8).attr('stroke-opacity',0.3)  // CDB90 has no direct Wikipedia links, so always use the search fallback
         .on('mouseover',function(ev,d){
           // CDB90 has no Wikipedia links; always show a search fallback
-          const wikiUrl=`https://en.wikipedia.org/wiki/Special:Search?search=${encodeURIComponent(d.name)}`;
+          const wikiUrl=`https://en.wikipedia.org/wiki/Special:Search?search=${encodeURIComponent(d.name)}`;  // Bind mousemove and mouseout for the tooltip
           tip.innerHTML=`<div class="tt-name">${d.name}</div><div class="tt-war">${d.war}</div>${ttRow('Year',fmtYear(d.year))}${ttRow('Location',d.locn)}${ttRow('Era',d.era.label)}<a class="tt-wiki" href="${wikiUrl}" target="_blank">Search Wikipedia →</a>`;
-          tip.style.display='block'; moveTip(ev);
-        })
+          tip.style.display='block'; moveTip(ev);  // Update: animate fill color and radius
+        })  // Exit: shrink to 0 then remove
         .on('mousemove',moveTip).on('mouseout',hideTip)
         .call(s=>s.transition().duration(400).attr('r',1/Math.sqrt(curK)*4.5)),
       up=>up.transition().duration(300).attr('fill',d=>d.era.color).attr('r',1/Math.sqrt(curK)*4.5),
@@ -1752,30 +1897,30 @@ function buildCDB90Map(world, processed) {
 
   // FIX: [data-cera] chips are scoped to their own querySelectorAll —
   // they never interfere with the [data-f] region chips on the explore map.
-  document.querySelectorAll('[data-cera]').forEach(chip => {
-    chip.addEventListener('click', () => {
-      document.querySelectorAll('[data-cera]').forEach(c=>c.classList.remove('on'));
+  document.querySelectorAll('[data-cera]').forEach(chip => {  // Activate the clicked chip
+    chip.addEventListener('click', () => {  // Update the active filter from the chip's data attribute
+      document.querySelectorAll('[data-cera]').forEach(c=>c.classList.remove('on'));  // Re-render the CDB90 map with the new era filter
       chip.classList.add('on');
       curFilter=chip.dataset.cera;
-      render();
+      render();  // Initial render of the CDB90 map showing all eras
     });
   });
 
   render();
 
   // Regional breakdown bar chart
-  const regionTotals={};
-  REGIONS.forEach(r=>regionTotals[r.key]=0);
-  processed.forEach(d=>{const rk=regionKey(d.lat,d.lon);regionTotals[rk]=(regionTotals[rk]||0)+1;});
-  const total=processed.length;
-  const barsEl=document.getElementById('cdb90-bars');
-  REGIONS.filter(r=>r.key!=='other').map(r=>({...r,count:regionTotals[r.key]||0,pct:(regionTotals[r.key]||0)/total}))
-    .sort((a,b)=>b.count-a.count)
-    .forEach(r=>{
+  const regionTotals={};  // Tally each CDB90 battle into its region bucket
+  REGIONS.forEach(r=>regionTotals[r.key]=0);  // Total battle count for percentage calculation
+  processed.forEach(d=>{const rk=regionKey(d.lat,d.lon);regionTotals[rk]=(regionTotals[rk]||0)+1;});  // Reference to the bar chart container element
+  const total=processed.length;  // Build bar data: filter 'other', compute percentages, sort descending
+  const barsEl=document.getElementById('cdb90-bars');  // Sort bars by battle count (largest first)
+  REGIONS.filter(r=>r.key!=='other').map(r=>({...r,count:regionTotals[r.key]||0,pct:(regionTotals[r.key]||0)/total}))  // For each region: create one bar row with name, colored fill, and percentage label
+    .sort((a,b)=>b.count-a.count)  // Create a bar row div and set its class
+    .forEach(r=>{  // Inner HTML: region name | track with colored fill | percentage (count in smaller text)
       const row=document.createElement('div'); row.className='cdb90-bar-row';
-      row.innerHTML=`<div class="cdb90-bar-name">${r.label}</div><div class="cdb90-bar-track"><div class="cdb90-bar-fill" style="width:${r.pct*100}%;background:${r.color}"></div></div><div class="cdb90-bar-pct">${Math.round(r.pct*100)}% <span style="color:var(--ink3);font-size:0.52rem;">(${r.count})</span></div>`;
-      barsEl.appendChild(row);
-    });
+      row.innerHTML=`<div class="cdb90-bar-name">${r.label}</div><div class="cdb90-bar-track"><div class="cdb90-bar-fill" style="width:${r.pct*100}%;background:${r.color}"></div></div><div class="cdb90-bar-pct">${Math.round(r.pct*100)}% <span style="color:var(--ink3);font-size:0.52rem;">(${r.count})</span></div>`;  // Append the bar row to the chart container
+      barsEl.appendChild(row);  // Compute Europe's percentage for the stat at the top of the section
+    });  // Update the Europe percentage stat in the CDB90 header
   const europePct=Math.round((regionTotals['europe']||0)/total*100);
   document.getElementById('cdb90-europe-pct').textContent=europePct+'%';
 }
@@ -1784,14 +1929,14 @@ function buildCDB90Map(world, processed) {
    Scrollama is a lightweight library that watches which "step"
    element is currently centred in the viewport (at the 50%
    offset point) and fires onStepEnter callbacks.
-════════════════════════════════════════════════════════ */
-function setupScrollama(ctrl) {
-  const sc = scrollama();
-  sc.setup({ step:'#steps-pane .step', offset:0.5 })
-    .onStepEnter(({ element }) => {
-      document.querySelectorAll('.step').forEach(s=>s.classList.remove('is-active'));
-      element.classList.add('is-active');
-      ctrl.setEra(element.dataset.era);
+════════════════════════════════════════════════════════ */  // setupScrollama(ctrl): initializes the Scrollama scroll observer for Chapter I
+function setupScrollama(ctrl) {  // Create a new Scrollama instance
+  const sc = scrollama();  // Configure: watch all .step elements, trigger at 50% of the viewport
+  sc.setup({ step:'#steps-pane .step', offset:0.5 })  // onStepEnter: called when a new step card enters the 50% viewport threshold
+    .onStepEnter(({ element }) => {  // Deactivate all step cards
+      document.querySelectorAll('.step').forEach(s=>s.classList.remove('is-active'));  // Activate the newly entered step card
+      element.classList.add('is-active');  // Tell the scrolly map to switch to this step's era
+      ctrl.setEra(element.dataset.era);  // Re-compute step positions when the window is resized
     });
   window.addEventListener('resize', sc.resize);
 }
@@ -1810,65 +1955,65 @@ function setupScrollama(ctrl) {
 
    If any step before (5) throws, the loading overlay shows
    a formatted error message with the error text and file paths.
-════════════════════════════════════════════════════════ */
-async function main() {
-  try {
-    setProgress(8, 'Fetching world map…');
+════════════════════════════════════════════════════════ */  // main(): async entry point — orchestrates all data loading and chart building
+async function main() {  // Wrap everything in try/catch so errors are shown in the loading overlay
+  try {  // Fetch the world TopoJSON from the jsDelivr CDN
+    setProgress(8, 'Fetching world map…');  // World atlas at 1:110M scale — country polygons suitable for world maps
     const world = await d3.json('https://cdn.jsdelivr.net/npm/world-atlas@2/countries-110m.json');
 
-    setProgress(30, 'Loading battle records…');
-    let battles;
+    setProgress(30, 'Loading battle records…');  // loadData() can throw if the file is missing — catch and re-throw with a cleaner message
+    let battles;  // Re-throw with a user-friendly message that includes the original error
     try {
       battles = await loadData();
     } catch(e) {
       throw new Error(
         `Could not load CSV file. Original error: ${e.message}`
       );
-    }
+    }  // Show progress with the loaded battle count
 
-    setProgress(65, `Loaded ${battles.length.toLocaleString()} battles — building visualizations…`);
+    setProgress(65, `Loaded ${battles.length.toLocaleString()} battles — building visualizations…`);  // Extract all valid years to compute the dataset's temporal span
 
-    const years    = battles.map(d => d.year).filter(Boolean);
-    const yearSpan = Math.abs(d3.max(years) - d3.min(years));
-    document.getElementById('s-battles').textContent = battles.length.toLocaleString();
+    const years    = battles.map(d => d.year).filter(Boolean);  // Update 'Unique Battles' hero stat
+    const yearSpan = Math.abs(d3.max(years) - d3.min(years));  // Update 'Years of History' hero stat (convert to K notation)
+    document.getElementById('s-battles').textContent = battles.length.toLocaleString();  // Update 'Distinct Conflicts' hero stat (count unique war labels)
     document.getElementById('s-years').textContent   = Math.round(yearSpan/100)/10+'K';
-    document.getElementById('s-wars').textContent    = new Set(battles.filter(d=>d.war).map(d=>d.war)).size.toLocaleString();
+    document.getElementById('s-wars').textContent    = new Set(battles.filter(d=>d.war).map(d=>d.war)).size.toLocaleString();  // Attempt to load the optional CDB90 data (silently ignore if files are missing)
 
-    setProgress(70, 'Loading CDB90 (optional)…');
+    setProgress(70, 'Loading CDB90 (optional)…');  // If CDB90 files are missing, log a message and leave cdb90Battles empty
     let cdb90Battles = [];
     try {
       cdb90Battles = await loadCDB90();
-    } catch(e) {
+    } catch(e) {  // If CDB90 data was loaded, build its map and charts
       console.info('CDB90 data not found — comparison section hidden.');
     }
     // buildCDB90Map reveals #cdb90-wrapper internally if it runs
-    if (cdb90Battles.length) buildCDB90Map(world, cdb90Battles);
+    if (cdb90Battles.length) buildCDB90Map(world, cdb90Battles);  // Build era legend for the scrolly section
 
-    setProgress(72, 'Hero map…');
-    buildHeroMap(world, battles);
-    buildLegend();
-    const ctrl = buildScrollyMap(world, battles);   setProgress(78, 'Scrolly map…');
-    buildExploreMap(world, battles);                setProgress(83, 'Explorer map…');
-    buildDocGapCharts(battles);                     setProgress(87, 'Documentation gap charts…');
+    setProgress(72, 'Hero map…');  // Build the explorer map; update progress
+    buildHeroMap(world, battles);  // Build documentation gap bar charts; update progress
+    buildLegend();  // Build the rhythm (stacked histogram) chart; update progress
+    const ctrl = buildScrollyMap(world, battles);   setProgress(78, 'Scrolly map…');  // Build battle duration histogram
+    buildExploreMap(world, battles);                setProgress(83, 'Explorer map…');  // Build top-wars horizontal bar chart; update progress
+    buildDocGapCharts(battles);                     setProgress(87, 'Documentation gap charts…');  // Build stream/sankey diagram; update progress (completes loading bar)
     buildRhythmChart(battles);                      setProgress(91, 'Rhythm chart…');
-    buildDurChart(battles);
+    buildDurChart(battles);  // Initialize Scrollama with the scrolly map controller
     buildWarsChart(battles);                        setProgress(95, 'War charts…');
     buildSankeyStream(battles);                     setProgress(100, 'Stream diagram — ready');
 
-    setupScrollama(ctrl);
+    setupScrollama(ctrl);  // After the fade completes, remove the overlay element from the DOM entirely
 
-    const ov = document.getElementById('loading');
-    ov.style.opacity = '0';
-    setTimeout(() => ov.remove(), 900);
+    const ov = document.getElementById('loading');  // If any step above threw, display the error inside the loading overlay
+    ov.style.opacity = '0';  // Replace the overlay content with an error card
+    setTimeout(() => ov.remove(), 900);  // Red error tag
 
-  } catch(err) {
+  } catch(err) {  // Preformatted error message
     document.getElementById('loading').innerHTML = `
       <div style="max-width:480px;padding:2rem;text-align:left;">
         <div style="font-family:var(--ffM);font-size:0.65rem;letter-spacing:0.2em;text-transform:uppercase;color:#9b2335;margin-bottom:0.8rem;">⚠ Data Load Error</div>
         <div style="font-family:var(--ffD);font-size:1.3rem;color:var(--ink);margin-bottom:1rem;">Could not load battle data</div>
         <pre style="font-family:var(--ffM);font-size:0.68rem;color:var(--ink2);background:var(--bg-hi);padding:1rem;border:1px solid var(--border);white-space:pre-wrap;line-height:1.8;">${err.message}</pre>
       </div>`;
-  }
+  }  // Call main() to start the application
 }
 
 main();

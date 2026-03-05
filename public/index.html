@@ -573,11 +573,7 @@
 */
 
 /* ══ DATA PATHS ══════════════════════════════════════════
-   All CSV files must be served from the same local server
-   as index.html.  If you open index.html as a file:// URL
-   browsers will block the fetches for security reasons.
-   Run:  python -m http.server 8080
-   then: http://localhost:8080
+   All CSV files must be served from data/ in same parent folder as index.html
 ════════════════════════════════════════════════════════ */
 const P = { battles: 'data/battles_wiki.csv' };
 
@@ -862,22 +858,6 @@ function buildLegend() {
    A sticky world map that updates as the user scrolls through
    the step cards on the right.  Each step card has a data-era
    attribute that tells setEra() which era to display.
-
-   HOW IT WORKS:
-     • A "ghost layer" of all battles is drawn at very low
-       opacity so the overall distribution is always visible.
-     • When setEra(key) is called, the era's battles are bound
-       to the dot layer with a D3 join — entering dots animate
-       in, updating dots stay, exiting dots animate out.
-     • The weighted centroid (mean lat/lon) of all battles in
-       the era is pre-computed and shown as a glowing amber dot.
-       A dashed line connects successive era centroids to show
-       the historical drift of documented conflict.
-     • Zoom is implemented via d3.zoom() on the SVG element.
-       Wheel events are now allowed so users can pinch/scroll
-       to zoom in; the +/− buttons also work.
-     • The zoom transform is applied to the mapG group, not
-       the SVG itself, so the buttons and badge are unaffected.
 ════════════════════════════════════════════════════════ */
 function buildScrollyMap(world, battles) {
   const W=900, H=470;
@@ -995,28 +975,6 @@ function buildScrollyMap(world, battles) {
 /* ══ CHAPTER II — EXPLORE MAP ════════════════════════════
    An interactive animated world map where battles appear as
    coloured dots through time.
-
-   ANIMATION:
-     The Play button starts a d3.interval timer that advances
-     curYear by (2 × speed) each tick (40 ms), re-rendering
-     the visible battles for each new year.  A "trail" of 50
-     years keeps recent battles visible with fading opacity.
-
-   REGION FILTER:
-     The chip buttons at the top set filterRegion and re-render.
-     Chips are scoped to [data-f] attributes so they don't
-     interfere with the CDB90 era chips ([data-cera]).
-
-   ZOOM:
-     d3.zoom() on the SVG; wheel events pass through so users
-     can zoom by scrolling over the map.  The +/− buttons in
-     the toolbar provide a mouse-free alternative.
-
-   FIX: curYear is now clamped to 2026 before the stop-check,
-     so the animation ends exactly at 2026 regardless of speed.
-   FIX: Speed button labels say "▶▶ Fast" / "▶ Normal" so the
-     label describes the action you're switching TO.
-   FIX: Chip selector scoped to [data-f] only.
 ════════════════════════════════════════════════════════ */
 function buildExploreMap(world, battles) {
   const W=960, H=500;
@@ -1152,16 +1110,7 @@ function buildExploreMap(world, battles) {
               (battles per million km²)
 
    The normalised chart reveals the "documentation gap" more
-   starkly than raw counts: Europe appears disproportionately
-   dense not because it had more conflict, but because European
-   scholars survived to write history down.
-
-   buildHBar() is a reusable helper that draws either chart
-   given a different data accessor and format function.
-
-   The europe-pct and africa-deficit numbers in the insight
-   boxes are computed from the same data and written into
-   the DOM before the chart is drawn.
+   starkly than raw counts.
 ════════════════════════════════════════════════════════ */
 function buildDocGapCharts(battles) {
   const withCoord = battles.filter(d => d.lat != null);
@@ -1209,8 +1158,7 @@ function buildDocGapCharts(battles) {
    Stacked area histogram: battles per 25-year bin, coloured
    by the region where the battle took place.
 
-   ANNOTATIONS — how are they chosen?
-   ─────────────────────────────────────────────────────────
+   
    The four vertical annotation lines mark turning points that
    are visible as sharp spikes or inflections in the histogram:
      • Alexander (≈ 330 BC) — peak of ancient Mediterranean warfare
@@ -1218,17 +1166,6 @@ function buildDocGapCharts(battles) {
      • WWI       (1916)     — midpoint of the WWI documentation spike
      • WWII      (1942)     — peak of the largest single-bin count
 
-   REGION: "OTHER / UNKNOWN"
-   ─────────────────────────────────────────────────────────
-   A battle is classified as "Other/Unknown" when:
-     (a) its Wikidata record has no coordinate (no `coord` field), OR
-     (b) its coordinate falls outside all the named bounding boxes in
-         the regionKey() function (e.g. deep ocean, polar regions,
-         or ambiguous coordinates like exactly 0°N 0°E).
-   These are real battles — they just lack reliable location data.
-   They are shown in the stacked chart so totals are accurate, but
-   are excluded from the map dots and the normalized-density chart
-   (since we can't place or region-assign them meaningfully).
 ════════════════════════════════════════════════════════ */
 function buildRhythmChart(battles) {
   const BIN=25, MIN_Y=-500, MAX_Y=2026;
@@ -1382,21 +1319,6 @@ function buildWarsChart(battles) {
 /* ══ CHAPTER IV — WAR DETAIL TIMELINE ═══════════════════
    When a user clicks a stream ribbon (or legend entry), this
    function draws a dot-column timeline for that specific war.
-
-   LAYOUT:
-     Each unique year in the war has a vertical "column" of dots,
-     one dot per documented battle.  Columns are stacked
-     symmetrically above and below a horizontal centre line.
-     If a column exceeds MAX_COL dots, a "+N" overflow label is
-     shown at the top rather than drawing dots off-screen.
-
-   This replaces the old scalePoint Y-axis layout where dots were
-   positioned by a point scale with no meaningful Y encoding.
-   Now Y position carries no information — only X (year) and dot
-   density (battles per year) matter, which is clearer.
-
-   The panel slides in as an absolute overlay over the stream
-   diagram.  The Back button restores the stream view.
 ════════════════════════════════════════════════════════ */
 function showWarDetail(war, warBattles, warColor) {
   const panel = document.getElementById('war-detail');
@@ -1503,21 +1425,9 @@ function showWarDetail(war, warBattles, warColor) {
    A stream graph (stacked area with wiggle offset) showing the
    battle frequency over time for the top N wars in the dataset.
 
-   WHICH WARS ARE INCLUDED?
-   ─────────────────────────────────────────────────────────
    The diagram automatically selects the TOP_N (currently 14)
    conflicts by total documented battle count, restricted to
-   battles dated between 1000 AD and 2026.  No wars are manually
-   curated — they emerge purely from the data.  In practice the
-   top slots are dominated by well-documented multi-theatre wars:
-   WWI, WWII, the Napoleonic Wars, and major colonial conflicts.
-   Changing TOP_N to a larger number adds more, smaller wars but
-   makes the diagram harder to read.
-
-   FIX: Reduced from 22 to 14 wars — fewer, more legible ribbons.
-   FIX: Label collision now checks a 2D bounding box, not just
-   horizontal distance, so nearby ribbons at different heights
-   both get labels instead of the lower one being silently dropped.
+   battles dated between 1000 AD and 2026.
 ════════════════════════════════════════════════════════ */
 function buildSankeyStream(battles) {
   const STREAM_MIN=1000, STREAM_MAX=2026, STEP=10, TOP_N=14;
@@ -1793,11 +1703,6 @@ function buildCDB90Map(world, processed) {
        data/battles.csv
        data/belligerents.csv
        data/battle_durations.csv
-     All three must exist and be served from the same local web server
-     (i.e. `python -m http.server 8080`).  Opening index.html directly
-     as a file:// URL will block CSV fetches due to CORS restrictions.
-     The loadCDB90() function wraps the fetch in a try/catch, so if the
-     files are missing it silently skips this section rather than throwing.
   */
   // Reveal the CDB90 section now that we confirmed data loaded
   const wrapper = document.getElementById('cdb90-wrapper');
@@ -1876,12 +1781,6 @@ function buildCDB90Map(world, processed) {
    Scrollama is a lightweight library that watches which "step"
    element is currently centred in the viewport (at the 50%
    offset point) and fires onStepEnter callbacks.
-
-   Here we use it to sync the sticky map (Chapter I) with the
-   narrative step cards on the right.  When a step enters,
-   we add the .is-active class (triggers CSS transitions for
-   opacity and slide-in) and call ctrl.setEra() to update
-   which battles are shown on the map.
 ════════════════════════════════════════════════════════ */
 function setupScrollama(ctrl) {
   const sc = scrollama();
@@ -1899,7 +1798,7 @@ function setupScrollama(ctrl) {
 
    SEQUENCE:
      1. Fetch world TopoJSON (from jsDelivr CDN)
-     2. Load + parse the battles CSV (local server)
+     2. Load + parse the battles CSV
      3. Optionally load CDB90 CSVs (silently skip if missing)
      4. Update the hero stat counters
      5. Build all charts and maps in order

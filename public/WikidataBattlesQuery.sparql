@@ -1,0 +1,51 @@
+SELECT DISTINCT ?item ?itemLabel ?itemDescription
+  ?date ?startDate ?endDate
+  ?coord ?location ?locationLabel ?locationCoord
+  ?partOf ?partOfLabel
+  ?casualties
+  ?outcome ?outcomeLabel
+  ?article
+WHERE {
+
+  # ── Only true battles, not campaigns or operations ──────────────
+  # We require the item to be an INSTANCE OF battle (or subclass),
+  # but we exclude items that themselves CONTAIN other battles (P527),
+  # which are campaigns. This removes "Battle of Normandy" while keeping
+  # "Battle of Omaha Beach".
+  ?item p:P31 ?s .
+  ?s (ps:P31/(wdt:P279*)) wd:Q178561 .
+
+  # Exclude items that have parts (i.e. are campaigns)
+  FILTER NOT EXISTS { ?item wdt:P527 ?part . }
+
+  # ── Dates ────────────────────────────────────────────────────────
+  OPTIONAL { ?item wdt:P585 ?date }
+  OPTIONAL { ?item wdt:P580 ?startDate }
+  OPTIONAL { ?item wdt:P582 ?endDate }
+
+  # ── Coordinates — battle-level first, location-entity fallback ───
+  # Direct coordinate on the battle (most precise)
+  OPTIONAL { ?item wdt:P625 ?coord }
+
+  # Location entity + its coordinates (city/region level fallback)
+  OPTIONAL {
+    ?item wdt:P276 ?location .
+    OPTIONAL { ?location wdt:P625 ?locationCoord }
+  }
+
+  # ── Context ───────────────────────────────────────────────────────
+  OPTIONAL { ?item wdt:P361 ?partOf }
+  OPTIONAL { ?item wdt:P1120 ?casualties }
+  OPTIONAL { ?item wdt:P793  ?outcome }
+
+  # ── Wikipedia article ─────────────────────────────────────────────
+  OPTIONAL {
+    ?article schema:about ?item ;
+             schema:inLanguage "en" ;
+             schema:isPartOf <https://en.wikipedia.org/> .
+  }
+
+  SERVICE wikibase:label {
+    bd:serviceParam wikibase:language "[AUTO_LANGUAGE],mul,en" .
+  }
+}

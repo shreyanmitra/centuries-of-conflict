@@ -1002,17 +1002,17 @@ function hideTip() {
 /* ── ERA DEFINITIONS (for map time indicator) ── */
 const MAP_ERAS = [
   { key:'ancient',  label:'The Ancient World',     color:'#8a6a30', min:-3000, max:499,
-    desc:'[PLACEHOLDER: Ancient civilizations and their conflicts around the Mediterranean, Mesopotamia, and beyond. Coverage is sparse and biased toward literate, state-based societies.]' },
+    desc:'Ancient civilizations and their conflicts around the Mediterranean, Mesopotamia, and beyond. Coverage is sparse and biased toward literate, state-based societies.' },
   { key:'medieval', label:'The Medieval World',     color:'#4a7a5a', min:500,   max:1399,
-    desc:'[PLACEHOLDER: The Mongol conquests, Islamic expansion, Crusades, and the birth of European nation-states. The centroid begins its long westward European pull.]' },
+    desc:'The Mongol conquests, Islamic expansion, Crusades, and the birth of European nation-states. The centroid begins its long westward European pull.' },
   { key:'earlymod', label:'Age of Gunpowder',       color:'#c8973a', min:1400,  max:1699,
-    desc:'[PLACEHOLDER: The gunpowder revolution reshapes warfare. European military historians begin systematically recording battles. The Ottoman and Mughal empires leave records; most of the world does not.]' },
+    desc:'The gunpowder revolution reshapes warfare. European military historians begin systematically recording battles. The Ottoman and Mughal empires leave records; most of the world does not.' },
   { key:'colonial', label:'The Colonial Era',       color:'#7a5a9a', min:1700,  max:1899,
-    desc:'[PLACEHOLDER: European powers project force globally — and their documentation does too. Colonial wars appear because European officers filed reports. Indigenous resistance goes largely unrecorded.]' },
+    desc:'European powers project force globally — and their documentation does too. Colonial wars appear because European officers filed reports. Indigenous resistance goes largely unrecorded.' },
   { key:'modern',   label:'The World Wars',         color:'#B5261C', min:1900,  max:1945,
-    desc:'[PLACEHOLDER: The two World Wars generated the densest documentation in history. Battles on the Eastern Front, North Africa, and the Pacific are meticulously recorded. The centroid snaps back to Europe.]' },
+    desc:'The two World Wars generated the densest documentation in history. Battles on the Eastern Front, North Africa, and the Pacific are meticulously recorded. The centroid snaps back to Europe.' },
   { key:'contemp',  label:'Contemporary Conflict',  color:'#1E3A5F', min:1946,  max:2030,
-    desc:'[PLACEHOLDER: Post-1945 conflict genuinely globalizes. The Middle East, Southeast Asia, and sub-Saharan Africa appear in force for the first time. Wikipedia\'s global editorial community closes some gaps.]' },
+    desc:'Post-1945 conflict genuinely globalizes. The Middle East, Southeast Asia, and sub-Saharan Africa appear in force for the first time. Wikipedia\'s global editorial community closes some gaps.' },
 ];
 function eraFor(y) { return MAP_ERAS.find(e => y >= e.min && y <= e.max) || MAP_ERAS[0]; }
 

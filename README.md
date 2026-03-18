@@ -26,6 +26,7 @@ Summary of Design Decisions (Contact the authors for more detail):
 11. Whether in the world map or in the tree map or stream graph, all battles have tooltips (which linger to allow user to interact with them). These tooltips contain important information about casualty and location, along with links to Wikipedia entries where applicable.
 12. The domain line is hidden globally (.axis .domain { display: none }) and the tick sizes are kept at 0-3px and angled so that the axes float as orientation guides instead of framing the chart, keeping the data marks as the dominant visual element.
 13. Treemap to Stream Graph Animation: The treemap is squarified for consistency and easier visualization. The colors are determined by the index in the _warPalette shared with the stream graph, such that the same war has the same color in both views, which is a prerequisite for the animation feeling consistent. The cells are staggered along the diagonal (x0 + y0 * 0.3) and eased with d3.easeCubicIn on collapse and d3.easeCubicOut on expand, simulating a physical draining effect instead of a simple fade out.
+14. For scatter plots, not all points are labeled to prevent clutter and overlap of text labels.
 
 ---
 The primary thesis of our visualization is that the historical record of human conflicts doesn't necessarily reflect reality but who held the pen. 

@@ -32,12 +32,6 @@ jobs:
         # Fixes: "tar: unrecognized option: hard-dereference"
         run: apk add --no-cache tar gzip
 
-      - name: Build Script
-        run: |
-          echo "Deploying..."
-          # Replace the line below with your actual build commands
-          mkdir -p public
-          echo "<html><body><h1>Hello from Alpine on GitHub Pages</h1></body></html>" > public/index.html
 
       - name: Upload artifact
         uses: actions/upload-pages-artifact@v3

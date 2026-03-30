@@ -1,27 +1,57 @@
-name: Deploy to Pages
+name: Deploy to GitHub Pages
 
 on:
   push:
     branches:
       - main
+  # Allows you to run this workflow manually from the Actions tab
+  workflow_dispatch:
+
+# Sets permissions of the GITHUB_TOKEN to allow deployment to GitHub Pages
+permissions:
+  contents: read
+  pages: write
+  id-token: write
+
+# Allow only one concurrent deployment
+concurrency:
+  group: "pages"
+  cancel-in-progress: true
 
 jobs:
-  pages:
+  # Build job: This replaces your GitLab 'pages' stage
+  build:
     runs-on: ubuntu-latest
     container:
       image: alpine:latest
-
     steps:
-      - name: Checkout code
+      - name: Checkout
         uses: actions/checkout@v4
 
-      - name: Build/Deploy Script
+      - name: Install GNU Tar
+        # Fixes: "tar: unrecognized option: hard-dereference"
+        run: apk add --no-cache tar gzip
+
+      - name: Build Script
         run: |
           echo "Deploying..."
-          # Ensure your 'public' directory exists and has content
-          mkdir -p public 
+          # Replace the line below with your actual build commands
+          mkdir -p public
+          echo "<html><body><h1>Hello from Alpine on GitHub Pages</h1></body></html>" > public/index.html
 
       - name: Upload artifact
         uses: actions/upload-pages-artifact@v3
         with:
           path: public
+
+  # Deploy job: This actually puts the files onto the GitHub Pages server
+  deploy:
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    runs-on: ubuntu-latest
+    needs: build
+    steps:
+      - name: Deploy to GitHub Pages
+        id: deployment
+        uses: actions/deploy-pages@v4

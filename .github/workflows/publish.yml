@@ -1,13 +1,27 @@
-image: alpine:latest
+name: Deploy to Pages
 
-pages:
-  stage: deploy
-  script:
-    - echo "Deploying..."
-  artifacts:
-    paths:
-      - public
-  tags:
-    - Pages
-  only:
-    - main
+on:
+  push:
+    branches:
+      - main
+
+jobs:
+  pages:
+    runs-on: ubuntu-latest
+    container:
+      image: alpine:latest
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Build/Deploy Script
+        run: |
+          echo "Deploying..."
+          # Ensure your 'public' directory exists and has content
+          mkdir -p public 
+
+      - name: Upload artifact
+        uses: actions/upload-pages-artifact@v3
+        with:
+          path: public

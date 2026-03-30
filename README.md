@@ -1,6 +1,6 @@
 # centuries-of-conflict
 
-The files in the [public](/public) directory are deployed to: [https://cse442.pages.cs.washington.edu/26wi/fp/centuries-of-conflict](https://shreyanmitra.github.io/centuries-of-conflict/)
+The files in the [public](/public) directory are deployed to: https://shreyanmitra.github.io/centuries-of-conflict/
 
 Authors: Shreyan Mitra, Biniyam Gebreyohannes, Kalkidan Maru, and Angelo Villacrez
 CSE 442, University of Washington
